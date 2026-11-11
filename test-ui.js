@@ -77,7 +77,7 @@ const tick = (ms = 0) => new Promise(r => setTimeout(r, ms));
   console.log('\n[UI 1] Yükleme ve sekmeler');
   ok(errors.length === 0, 'sayfa betik hatası olmadan yükleniyor', errors.slice(0, 3).join(' | '));
   const tabs = [...doc.querySelectorAll('#tabs [role=tab]')];
-  ok(tabs.length === 8 && visible().join() === 'panel-dersler', 'ilk açılışta yalnız Dersler paneli görünür', visible().join());
+  ok(tabs.length === 9 && visible().join() === 'panel-dersler', 'ilk açılışta yalnız Dersler paneli görünür', visible().join());
   let tabErr = [];
   for(const t of tabs){
     click(t);
@@ -174,6 +174,51 @@ const tick = (ms = 0) => new Promise(r => setTimeout(r, ms));
   ok(saved.length === 1 && saved[0].text.includes('sozleri') && saved[0].source && $('songsel').value === saved[0].id,
      'sözler eşleşip kaydediliyor (yalnız yerel depoda), kaynak bağlantısı korunuyor');
 
+  ok($('songband') && $('songband').checked && $('songbandstyle').textContent.includes('Eşlik'), 'Şarkılar: grup eşliği açık, vuruşa uyan kalıp yazıyor');
+  const BandObj = g('Band'); let bandBars = 0; const origBar = BandObj.songBar; BandObj.songBar = (...a) => { bandBars++; return origBar(...a); };
+  $('songrhy').value = 'sekizlik'; $('songbpm').value = 160;
+  click($('songdemo')); await tick(1700); click($('songstop'));
+  BandObj.songBar = origBar;
+  ok(bandBars >= 1, 'şarkı dinlenirken grup ölçü ölçü çalıyor', bandBars + ' ölçü');
+
+  console.log('\n[UI 6b] Parçalar');
+  click(tabs.find(t => t.id === 'tab-parcalar'));
+  ok(!$('panel-parcalar').hidden && doc.querySelectorAll('#pcscore svg.score').length === 1, 'Parçalar sekmesi açılıyor, dizek çiziliyor');
+  const pcOpts = [...$('pcsel').options];
+  let pcErr = [];
+  for(const o of pcOpts){
+    $('pcsel').value = o.value; $('pcsel').dispatchEvent(new win.Event('change'));
+    const p = win.parsePiece(win.pieceById(o.value).text, win.pieceById(o.value).meter);
+    if(doc.querySelectorAll('#pcscore .pn').length !== p.notes.length) pcErr.push(o.value + ': nota sayısı');
+    if(doc.querySelectorAll('#pcscore .chs').length < 1) pcErr.push(o.value + ': akor yok');
+    if(doc.querySelectorAll('#pcscore .tabn').length !== p.notes.filter(n => n.w !== null).length) pcErr.push(o.value + ': tab');
+    if($('pcgroove').selectedOptions[0].disabled) pcErr.push(o.value + ': eşlik ölçüsü');
+  }
+  ok(pcOpts.length >= 19 && pcErr.length === 0, pcOpts.length + ' parçanın notası, akorları ve tabı çiziliyor; eşlik ölçüye uyuyor', pcErr.join(' | '));
+  $('pcsel').value = 'karsilama-etut'; $('pcsel').dispatchEvent(new win.Event('change'));
+  ok($('pcgroove').value === 'karsilama' && [...$('pcgroove').options].filter(o => !o.disabled).every(o => win.grooveById(o.value).beats === 4.5),
+     '9/8 parçada yalnız 9/8 kalıplar seçilebiliyor');
+  ok(doc.querySelectorAll('#pcscore .acc').length >= 2 && doc.querySelectorAll('#pcscore .beam').length >= 2, 'değiştiriciler ve kirişler çiziliyor');
+  $('pcpct').value = 130; $('pcpct').dispatchEvent(new win.Event('input'));
+  click($('pclisten')); await tick(300);
+  ok(!$('pcstop').disabled && $('pcplayer').classList.contains('on'), 'Dinle: çalıcı açık');
+  click($('pcstop'));
+  ok($('pcstop').disabled, 'Durdur');
+  click(doc.querySelector('#pcscore [data-bar="2"]'));
+  ok($('pcnow').textContent.includes('3. ölçü'), 'ölçüye dokununca oradan başlar');
+  click($('pcloop')); click(doc.querySelector('#pcscore [data-bar="1"]')); click(doc.querySelector('#pcscore [data-bar="3"]'));
+  ok($('pcnow').textContent.includes('2–4') && doc.querySelectorAll('#pcscore .pn.inloop').length > 0, 'döngü iki ölçü arasına kuruluyor');
+  click($('pcloop'));
+  ok(doc.querySelectorAll('#pcsteps li').length === 6, 'Parçayı öğren: 6 adım');
+  $('pceditor').open = true; click($('pcnew'));
+  $('pcedtitle').value = 'Deneme'; click($('pcsave'));
+  const myp = JSON.parse(win.localStorage.getItem('gt.pieces') || '[]');
+  ok(myp.length === 1 && $('pcsel').value === myp[0].id && doc.querySelectorAll('#pcscore .pn').length === 7, 'kendi parçan kaydediliyor ve çiziliyor');
+  $('pcedtext').value = 'C5 C5 | C5 C5 C5 | C5:4'; $('pcedtext').dispatchEvent(new win.Event('input'));
+  ok($('pcederr').textContent.includes('Hatalı'), 'hatalı ölçü bildiriliyor');
+  $('pcpct').value = 100; $('pcpct').dispatchEvent(new win.Event('input'));
+  click(tabs.find(t => t.id === 'tab-ezgiler'));
+
   console.log('\n[UI 7] Ezgiler ve kulak');
   ok(doc.querySelectorAll('#melnotes .mnote').length === win.parseMelody(win.melodyById('nese').text).notes.length, 'Neşeye Övgü nota kartları');
   click(tabs.find(t => t.id === 'tab-kulak'));
@@ -228,7 +273,8 @@ const tick = (ms = 0) => new Promise(r => setTimeout(r, ms));
      $3('tstrings').textContent.includes('E2') && $3('perde').textContent === 'G4', 'dersler, akor adı ve nota adları İngilizce (C D E)',
      D.querySelector('#llist .lesson h3').textContent + ' / ' + $3('cname').textContent + ' / ' + $3('perde').textContent);
   // Özel adlar (şarkı, sanatçı, usul) dışında Türkçe harf kalmamalı
-  const NAMES = [...G('SONGS').flatMap(x => [x.title, x.artist || '']), 'Türk aksağı', 'Türkçe', 'Müfit Erdağ', 'Mor ve Ötesi', 'Barış Manço', 'Yüksek Sadakat', 'MFÖ', 'Kâtibim', 'düm']
+  const NAMES = [...G('SONGS').flatMap(x => [x.title, x.artist || '']), ...G('PIECES').flatMap(x => [x.title, x.title_en || '', x.by, x.by_en || '']),
+    ...G('GROOVES').flatMap(x => [x.name, x.name_en]), 'Türk aksağı', 'Türkçe', 'Müfit Erdağ', 'Mor ve Ötesi', 'Barış Manço', 'Yüksek Sadakat', 'MFÖ', 'Kâtibim', 'düm']
     .filter(Boolean).sort((a, b) => b.length - a.length);
   const leftovers = [];
   for(const tb of [...D.querySelectorAll('#tabs [role=tab]')]){

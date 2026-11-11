@@ -28,6 +28,20 @@ Mikrofondan çaldığını dinler ve geri bildirim verir. Ses cihazda işlenir, 
   akorları editöre kopyalar; sözleri yapıştırınca her satır sıradaki akor satırıyla eşleşir. Sözlü kopya yalnızca senin
   tarayıcında saklanır. Çalan akor yanar, sıradaki gösterilir; dinle ya da mikrofonla birlikte çal (sonunda zamanlama yüzdesi).
   Kendi şarkını `[Am]söz [G*2]söz` biçiminde de yazabilirsin.
+- **Parçalar** (Sol Klarnet'teki eşlik ve “Benimle çal”ın gitar sürümü): notalı parçalar — gitar anahtarlı dizek (donanım,
+  değiştiriciler, kirişler), altında tab (tel ve perde komşu notalara göre), üstte akorlar. **Eşlik grubu** davul (Türk
+  ritimlerinde darbuka), bas ve akorla çalar: Batı kalıpları (rock, pop, balad, shuffle, vals, 6/8, marş, folk, davulsuz
+  klasik) ve Türk ritimleri (kasap havası, çiftetelli, karşılama, Roman havası, aksak 9/8, Türk aksağı, Rumeli 7/8, zeybek).
+  **Dinle** (imleç notayı izler), **Grupla çal** (sabit tempo; doğru nota ve zamanlama ayrı puanlanır), **Benimle çal**
+  (grup ilk notanla girer, temponu izler, durunca bekler, kaldığın yerden devam eder). Hız %40–130, ölçüye dokununca oradan
+  çalar, iki ölçü arası döngü, partileri aç/kapa, altı adımlı **Parçayı öğren**, kendi parçanı yazma
+  (`[Am] E5 D5:0.5 C5:0.5 A4:2 | …`). Parçalar: Neşeye Övgü, Jingle Bells, When the Saints, Oh! Susanna, Amazing Grace,
+  Greensleeves, Happy Birthday, Für Elise, Minuet in G, Auld Lang Syne, Frère Jacques, Twinkle; Türkçe bilinen ezgiler
+  (Daha Dün Annemizin, Ali Baba'nın Çiftliği); Pena için yazılmış etütler (karşılama, çiftetelli, kasap havası, rock riff,
+  12 ölçülük blues). Telifli şarkıların ezgisi eklenmedi. Kulaklık yokken grup hoparlörden yalnız alçak bas ve tok davul
+  çalar (perde bulucunun ve vuruş yakalayıcının bandının altında); kulaklıkla bütün grup.
+- **Şarkılarda grup eşliği**: Türkçe pop/rock, türküler ve yabancı şarkılar seçili vuruşa uyan kalıpla (davul + bas,
+  capo hesaba katılarak) çalınır; birlikte çalarken de.
 - **Ezgiler**: nota nota çalma; her notanın teli, perdesi ve parmağı komşu notalara göre seçilir (pozisyon planı), tab. Doğru notayı
   duyunca sıradakine geçer, yanlışta ne duyduğunu söyler. Kendi ezgini `Mi4 Re4 Do4:2` biçiminde yazabilirsin.
 - **Kulak**: majör/minör, majör/minör/yedili, aralıklar, hangi açık tel; 10 soruluk turlar, en iyi puan.
@@ -86,6 +100,10 @@ tıklayarak dener; dil ve tema geçişlerini de denetler. GitHub Actions her pus
   şekillere sadeleştirildi; kaynakta süre bilgisi olmadığı için ölçü süreleri, tempo ve vuruş önerisi yaklaşıktır.
 - Türkülerin akorları da Ultimate Guitar kullanıcı sayfalarından; Sarı Gelin ve Yemen Türküsü sayfaları oylanmamış, doğrulanmamıştır.
 - Hazır ezgiler kamu malı eserlerdir (Neşeye Övgü, Twinkle Twinkle, Frère Jacques).
+- Parçalar: Batı parçaları telif süresi dolmuş eserler ve geleneksel ezgilerdir; ezgiler bilinen biçimlerinden yazıldı, gitar için
+  1. pozisyona uygun oktava taşındı, akorlar sadeleştirildi. Daha Dün Annemizin “Hänschen klein”, Ali Baba'nın Çiftliği
+  “Old MacDonald” ezgisidir. Etütler Pena için yazıldı. Türk ritimlerinin darbuka kalıpları ve seni izleyen eşlik mantığı
+  (TempoMap, ScoreFollower) Sol Klarnet uygulamasından uyarlandı.
 
 ## Dosyalar
 
@@ -93,8 +111,8 @@ tıklayarak dener; dil ve tema geçişlerini de denetler. GitHub Actions her pus
 |---|---|
 | `index.html` | Yalnızca işaretleme: ayar çubuğu, sekmeler, paneller |
 | `css/app.css` | Stiller (açık/koyu tema) |
-| `js/core/` | Saf mantık, tarayıcı ve Node testleri ortak: `i18n` (dil, metin sözlüğü), `music` (nota, perde bulucu, FFT), `guitar` (akort, sap, parmak planı), `chords`, `rhythm`, `songs`, `ear`, `lessons` |
-| `js/app/` | Arayüz modülleri: `base` (ayarlar, olay yolu, ses üretimi, mikrofon), `i18n-html` (sayfa metinleri), `tabs`, `settings`, `metronome`, `prefs` (tema, dil), `sap`, `tuner`, `chords`, `rhythm`, `songs`, `melody`, `ear`, `lessons`, `main` |
+| `js/core/` | Saf mantık, tarayıcı ve Node testleri ortak: `i18n` (dil, metin sözlüğü), `music` (nota, perde bulucu, FFT), `guitar` (akort, sap, parmak planı), `chords`, `rhythm`, `songs`, `band` (eşlik kalıpları), `follow` (tempo haritası, parça takipçisi), `pieces` (nota yazımı, parçalar), `ear`, `lessons` |
+| `js/app/` | Arayüz modülleri: `base` (ayarlar, olay yolu, ses üretimi, mikrofon), `i18n-html` (sayfa metinleri), `tabs`, `settings`, `metronome`, `prefs` (tema, dil), `sap`, `tuner`, `chords`, `rhythm`, `songs`, `melody`, `band` (grup sesi ve çalıcısı), `staff` (dizek ve tab çizimi), `pieces` (Parçalar sekmesi), `ear`, `lessons`, `main` |
 | `sw.js`, `manifest.webmanifest`, `icon.svg`, `icons/`, `screenshots/` | Çevrimdışı kullanım, ana ekrana ekleme, mağaza görselleri |
 | `fonts/`, `css/fonts.css` | Uygulamayla gelen fontlar ve lisansları (OFL) |
 | `privacy.html` | Gizlilik politikası (Türkçe + İngilizce) |

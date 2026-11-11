@@ -37,6 +37,7 @@
   <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21M9 21h6"/></symbol>
   <symbol id="i-metro" viewBox="0 0 24 24"><path d="M9.5 3h5l3.5 18H6z"/><path d="M6.8 17h10.4M12 15l5-9"/></symbol>
   <symbol id="i-set" viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 12h3M11 12h9M4 17h11M19 17h1"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="17" r="2"/></symbol>
+  <symbol id="i-band" viewBox="0 0 24 24"><ellipse cx="12" cy="9" rx="8" ry="3.2"/><path d="M4 9v6c0 1.8 3.6 3.2 8 3.2s8-1.4 8-3.2V9"/><path d="M15 3.5l4 3.5M9 3.5 5 7"/></symbol>
   <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
 </svg>
 
@@ -57,6 +58,7 @@
         <button type="button" role="tab" id="tab-sarkilar" aria-controls="panel-sarkilar"><svg class="ico" aria-hidden="true"><use href="#i-song"/></svg><span class="tl" data-i18n="h.tab-sarkilar">Şarkılar</span></button>
         <div class="tabmore" id="tabmore">
           <div class="navlabel" aria-hidden="true" data-i18n="h.daha-fazla">Daha fazla</div>
+          <button type="button" role="tab" id="tab-parcalar" aria-controls="panel-parcalar"><svg class="ico" aria-hidden="true"><use href="#i-band"/></svg><span class="tl" data-i18n="h.tab-parcalar">Parçalar</span></button>
           <button type="button" role="tab" id="tab-sap" aria-controls="panel-sap"><svg class="ico" aria-hidden="true"><use href="#i-neck"/></svg><span class="tl" data-i18n="h.tab-sap">Sap ve notalar</span></button>
           <button type="button" role="tab" id="tab-ritim" aria-controls="panel-ritim"><svg class="ico" aria-hidden="true"><use href="#i-rhythm"/></svg><span class="tl" data-i18n="h.tab-ritim">Ritim</span></button>
           <button type="button" role="tab" id="tab-ezgiler" aria-controls="panel-ezgiler"><svg class="ico" aria-hidden="true"><use href="#i-melody"/></svg><span class="tl" data-i18n="h.tab-ezgiler">Ezgiler</span></button>
@@ -418,6 +420,11 @@
     </section>
   </section>
 
+  <!-- ===== Parçalar: notalı parçalar ve eşlik grubu (içerik js/app/pieces.js) ===== -->
+  <section class="panel" id="panel-parcalar" role="tabpanel" aria-labelledby="tab-parcalar" hidden>
+    <div id="pcroot"></div>
+  </section>
+
   <!-- ===== Ezgiler ===== -->
   <section class="panel" id="panel-ezgiler" role="tabpanel" aria-labelledby="tab-ezgiler" hidden>
     <section class="card" aria-labelledby="mellab">
@@ -573,9 +580,14 @@
 <script src="js/core/chords.js"></script>
 <script src="js/core/rhythm.js"></script>
 <script src="js/core/songs.js"></script>
+<script src="js/core/band.js"></script>
+<script src="js/core/follow.js"></script>
+<script src="js/core/pieces.js"></script>
 <script src="js/core/ear.js"></script>
 <script src="js/core/lessons.js"></script>
 <script src="js/app/base.js"></script>
+<script src="js/app/band.js"></script>
+<script src="js/app/staff.js"></script>
 <script src="js/app/i18n-html.js"></script>
 <script src="js/app/tabs.js"></script>
 <script src="js/app/settings.js"></script>
@@ -587,6 +599,7 @@
 <script src="js/app/rhythm.js"></script>
 <script src="js/app/songs.js"></script>
 <script src="js/app/melody.js"></script>
+<script src="js/app/pieces.js"></script>
 <script src="js/app/ear.js"></script>
 <script src="js/app/lessons.js"></script>
 <script src="js/app/main.js"></script>

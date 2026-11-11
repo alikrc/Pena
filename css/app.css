@@ -642,3 +642,50 @@ details.more .data{margin-top:14px;padding-top:0;border-top:0}
 .lead:empty,.cresult:empty{margin:0}
 
 @media (prefers-reduced-motion: reduce){.lessonbar,.modal{animation:none}}
+
+/* ---- Parçalar: dizek, tab ve eşlik grubu ---- */
+.pcparts{display:flex;flex-wrap:wrap;gap:4px 16px;align-items:center;margin:0 0 6px}
+.pcparts .reg{font-size:12px;color:var(--muted);padding-bottom:6px}
+.scorebox{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px 0;margin:6px 0 4px;max-height:62vh;overflow-y:auto}
+svg.score{display:block;max-width:none}
+.score .sl{stroke:var(--muted);stroke-width:1}
+.score .tl{stroke:var(--line);stroke-width:1}
+.score .bl{stroke:var(--muted);stroke-width:1}
+.score .bl.end{stroke:var(--ink);stroke-width:2.5}
+.score .clef{font:38px "Noto Music","Segoe UI Symbol","Apple Symbols",serif;fill:var(--ink)}
+.score .c8{font:italic 600 9px var(--ui);fill:var(--ink);text-anchor:middle}
+.score .tabl{font:700 8px var(--mono);fill:var(--muted);writing-mode:vertical-rl;letter-spacing:1px}
+.score .tsig{font:700 17px var(--display);fill:var(--ink);text-anchor:middle}
+.score .acc{font:17px "Noto Music","Segoe UI Symbol",var(--ui);fill:var(--ink);text-anchor:middle}
+.score .chs{font:700 13px var(--ui);fill:var(--teal)}
+.score .head{fill:var(--ink);stroke:var(--ink);stroke-width:1}
+.score .head.hol{fill:var(--surface);stroke-width:1.6}
+.score .nat,.score .stem,.score .flag,.score .ledger{stroke:var(--ink);fill:none;stroke-width:1.2}
+.score .flag{stroke-width:1.6}
+.score .beam{stroke:var(--ink);stroke-width:4}
+.score .dot,.score .rest{fill:var(--ink)}
+.score .restp{stroke:var(--ink);stroke-width:2;fill:none;stroke-linejoin:round}
+.score .tbg{fill:var(--surface)}
+.score .tabn{font:600 11px var(--mono);fill:var(--ink);text-anchor:middle}
+.score .barhit{fill:transparent;cursor:pointer}
+.score .barhit:hover{fill:color-mix(in srgb,var(--teal) 7%,transparent)}
+.score .pn{cursor:pointer}
+.score .pn.inloop .head:not(.hol),.score .pn.inloop .tabn{fill:var(--teal)}
+.score .pn.from .head{stroke:var(--teal);stroke-width:3}
+.score .pn.play .head,.score .pn.cur .head{fill:var(--accent);stroke:var(--accent)}
+.score .pn.play .tabn,.score .pn.cur .tabn{fill:var(--accent);font-weight:700}
+.score .pn.cur .head{stroke-width:4}
+.score .pn.ok .head:not(.hol),.score .pn.ok .tabn{fill:var(--ok)}
+.score .pn.ok .head{stroke:var(--ok)}
+.score .pn.bad .head:not(.hol),.score .pn.bad .tabn{fill:#C0392B}
+.score .pn.bad .head{stroke:#C0392B}
+.score .pn.miss .head{stroke:var(--muted);fill:var(--muted);opacity:.55}
+.score .pn.miss .tabn{fill:var(--muted)}
+details.learn{margin:10px 0 12px;border:1px solid var(--line);border-radius:12px;padding:8px 12px}
+details.learn summary{cursor:pointer;font-weight:600;font-size:14px}
+details.learn .steps{margin:10px 0 2px}
+details.learn .steps li{grid-template-columns:1fr auto;align-items:center;padding:8px 10px;border-radius:10px;background:var(--sunk)}
+details.learn .steps li span{display:grid;gap:2px}
+details.learn .steps li small{color:var(--muted);font-size:12.5px;line-height:1.4}
+details.learn .steps li.done b{color:var(--ok)}
+#pcedtext{min-height:110px}

@@ -20,7 +20,8 @@ Eklenebilecek özellikler, öncelik sırasıyla. Bitince `[x]` ile işaretle.
 - [ ] **Makamlar (12 sesli yaklaşım).** Hicaz, Kürdi, Nihavent, Uşşak vb. gitarda çalınabilen yaklaşımları; "koma sesleri
       gitarda yok" notuyla.
 - [ ] **Parmakla çalma (arpej) kalıpları.** Ritim sekmesine Travis ve basit arpejler.
-- [ ] **Daha fazla ezgi.** Şu an 3 tane; kamu malı Türk ezgileri / türkü melodileri.
+- [x] **Daha fazla ezgi.** Parçalar sekmesi: 19 notalı parça, eşlik grubu, Benimle çal.
+- [ ] **Türkü ezgileri.** Kâtibim, Sarı Gelin gibi anonim türkülerin ezgileri güvenilir bir notadan (ör. TRT repertuvarı) alınıp Parçalar'a eklenmeli.
 
 ## Şarkılar
 

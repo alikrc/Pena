@@ -71,6 +71,7 @@ const Rhythm = (() => {
     clearInterval(s.timer); cancelAnimationFrame(s.raf); s.timeouts.forEach(clearTimeout);
     s.voices.forEach(v => Snd.fadeOut(v));
     if(s.unsub) s.unsub();
+    if(s.onBarAudio) Band.songStop();
     if(s.onStop) s.onStop();
   }
   // Vuruş: aşağı = kalından inceye tüm çalınan teller, yukarı = inceden kalına ince 4 tel, daha hafif.
@@ -98,6 +99,7 @@ const Rhythm = (() => {
       }
       if(r.beats.includes(i) && (rs.click || bar < 0)) Snd.click(t, i === 0);
       if(bar >= 0 && r.slots[i] !== "-" && rs.mode === "demo") strumAt(t, r.slots[i] === "D", r.accents[i] || 0, rs.chordAt(bar));
+      if(bar >= 0 && i === 0 && rs.onBarAudio) rs.onBarAudio(bar, t, n*dt);   // grup eşliği: ölçü ses saatinde önceden kurulur
       if(bar >= 0 && i === 0 && rs.onBar){
         const s = rs, b = bar;
         rs.timeouts.push(setTimeout(() => { if(rs === s) s.onBar(b); }, Math.max(0, (t - a.currentTime)*1000)));
@@ -306,6 +308,7 @@ const Rhythm = (() => {
   return {
     start, stop, summarize,
     get latencyMeasured(){ return latency !== null; },
+    get latency(){ return curLatency(); },
     open(id, b){ const r = rhythmById(id); if(r) selectRhythm(r); if(b) setBpm(b); }
   };
 })();

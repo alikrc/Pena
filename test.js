@@ -1,6 +1,6 @@
 // Testler: js/core/*.js dosyaları tarayıcıdaki sırayla bir vm bağlamına yüklenir ve oradaki adlar kullanılır.
 const fs = require('fs'), path = require('path'), vm = require('vm');
-const CORE = ['i18n', 'music', 'guitar', 'chords', 'rhythm', 'songs', 'ear', 'lessons'];
+const CORE = ['i18n', 'music', 'guitar', 'chords', 'rhythm', 'songs', 'band', 'follow', 'pieces', 'ear', 'lessons'];
 const ctx = vm.createContext({ console });
 for(const f of CORE) vm.runInContext(fs.readFileSync(path.join(__dirname, 'js/core', f + '.js'), 'utf8'), ctx, { filename: f + '.js' });
 const core = new Proxy({}, { get: (_, k) => vm.runInContext(String(k), ctx) });
@@ -401,6 +401,73 @@ console.log('\n[22b] Metronom: dokunarak tempo');
 const { tapTempo } = core;
 ok(tapTempo([0,500,1000,1500])===120 && tapTempo([0,500,1000,1700,2200])===120, 'esit dokunus 120 BPM; tek kacan dokunus ortancayi bozmuyor');
 ok(tapTempo([0])===null && tapTempo([0,500,5000,5600])===100, 'tek dokunus tempo vermez; 2 sn ara yeni dizi baslatir');
+
+console.log('\n[24] Eslik grubu kaliplari');
+const { GROOVES, grooveById, grooveBar, bassMidi, chordMidis, RHYTHM_GROOVE, pieceBandEvents } = core;
+let grErr = [];
+for(const g of GROOVES){
+  const lanes = g.darbuka ? [g.darbuka, g.fill] : [g.kick, g.snare, g.hat, g.fillSnare];
+  for(const s of [...lanes, g.bass, g.chord]) if(s !== undefined && s.length !== g.cells) grErr.push(g.id + ': dizi uzunlugu');
+  const [n, d] = g.meter.split('/').map(Number);
+  if(Math.abs(n*4/d - g.beats) > 1e-9) grErr.push(g.id + ': olcu suresi');
+  if(!/^[13568.]+$/.test(g.bass)) grErr.push(g.id + ': bas');
+}
+ok(grErr.length === 0 && GROOVES.length >= 15, GROOVES.length + ' kalip: dizi uzunluklari ve olcu sureleri tutarli', grErr.join(' | '));
+ok(Object.entries(RHYTHM_GROOVE).every(([r, g]) => rhythmById(r) && grooveById(g) && Math.abs(rhythmById(r).slots.length/2 - grooveById(g).beats) < 1e-9),
+   'her vurus kalibinin grup kalibi ayni olcu suresinde');
+ok(bassMidi('Am') === 33 && bassMidi('E') === 28 && bassMidi('Am', '5') === 28 && bassMidi('C', '8') === 48 && bassMidi('Xm') === null,
+   'bas: La1 kok, Mi1 kok, La minorun beslisi Mi1, oktav');
+let bassOk = true;
+for(const c of CHORDS) for(const k of ['1','3','5','6']){ const m = bassMidi(c, k); if(!(m >= 28 && m <= 39)) bassOk = false; }
+ok(bassOk, 'bas notalari Mi1–Re#2 arasinda (duyulan Mi2 altinda: mikrofona sizsa da nota sanilmaz)');
+ok(chordMidis('Am').join() === '57,60,64' && chordMidis('G7').length === 4, 'akor vurusu: Am = La3 Do4 Mi4', chordMidis('Am').join());
+const rk = grooveBar(grooveById('rock'), 0, () => 'Am');
+ok(rk.filter(e => e.k === 'S').map(e => e.b).join() === '1,3' && rk.filter(e => e.part === 'bass')[0].m === 33, 'rock: trampet 2 ve 4te, bas La');
+const swb = grooveBar(grooveById('pop'), 0, b => b < 2 ? 'C' : 'G').filter(e => e.part === 'bass');
+ok(swb.some(e => e.b === 2 && e.m === bassMidi('G')), 'olcu ortasinda akor degisince bas yeni koku caliyor');
+ok(grooveBar(grooveById('rock'), 3, () => 'C').filter(e => e.k === 'S').length > grooveBar(grooveById('rock'), 0, () => 'C').filter(e => e.k === 'S').length,
+   'cumlenin 4. olcusu dolgu');
+ok(grooveBar(grooveById('karsilama'), 0, () => 'A', { drum:false, chord:false }).every(e => e.part === 'bass'), 'partiler kapatilabiliyor');
+
+console.log('\n[25] Parcalar: nota yazimi ve hazir parcalar');
+const { PIECES, parsePiece, pieceTargets, KEY_SIG } = core;
+let pz = parsePiece('C5:0.5 D5:0.5 | [Am] E5 r:1 F#5:2 | [G] G5:4', '4/4');
+ok(pz.errors.length === 0 && pz.bars.length === 3 && !pz.bars[0].full && pz.bars[1].full && pz.notes[3].w === null && pz.notes[4].w === 78,
+   'on vuruslu, suslu, diyezli parca ayristiriliyor', pz.errors.join(','));
+ok(pz.chordAt(0) === null && pz.chordAt(1) === 'Am' && pz.chordAt(3.5) === 'Am' && pz.chordAt(5) === 'G', 'chordAt: akor yazildigi vurustan itibaren');
+ok(parsePiece('C5 C5 | C5 C5 C5 | C5 C5 C5 C5', '4/4').errors.length === 1 && parsePiece('C5:3.5 | C5:4', '4/4').errors.length === 1 &&
+   parsePiece('[Xm] C5:4', '4/4').errors.length === 1, 'eksik ara olcu, gecersiz sure ve bilinmeyen akor hata');
+ok(pieceTargets(pz).length === 5, 'takip edilen notalar suslari icermiyor');
+const pzErr = [];
+for(const p of PIECES){
+  const r = parsePiece(p.text, p.meter), g = grooveById(p.groove);
+  if(r.errors.length) pzErr.push(p.id + ': ' + r.errors.join(','));
+  if(!g || Math.abs(g.beats - r.barBeats) > 1e-9) pzErr.push(p.id + ': kalip olcusu');
+  if(!(p.key in KEY_SIG)) pzErr.push(p.id + ': donanim');
+  if(!r.chords.length) pzErr.push(p.id + ': akor yok');
+  for(const n of r.notes) if(n.w !== null && !(n.w >= 52 && n.w <= 84)) pzErr.push(p.id + ': aralik disi ' + n.w);
+  if(!['west','tr','etude'].includes(p.group) || !p.title || !p.by) pzErr.push(p.id + ': bilgi');
+  if(g && pieceBandEvents(r, g).length < r.bars.filter(b => b.full).length) pzErr.push(p.id + ': eslik');
+}
+ok(pzErr.length === 0 && PIECES.length >= 15, PIECES.length + ' parcanin olculeri, akorlari, kaliplari ve notalari gecerli', pzErr.join(' | '));
+ok(new Set(PIECES.map(p => p.id)).size === PIECES.length && ['west','tr','etude'].every(g => PIECES.some(p => p.group === g)), 'kimlikler tekil; Bati, Turkce ve etut gruplari var');
+
+console.log('\n[26] Seni izleyen eslik: tempo haritasi ve takipci');
+const { TempoMap, ScoreFollower, followWait, playSummary } = core;
+let mp = new TempoMap(500, 0, 0);
+for(let b = 0; b <= 8; b++) mp.observe(b*600, b);
+ok(Math.abs(mp.beatMs - 600) < 30 && mp.pct() < 90, 'yavas calinca tempo haritasi yavasliyor', Math.round(mp.beatMs) + ' ms, %' + mp.pct());
+const tg = [{ i:0, beat:0, w:72 }, { i:1, beat:1, w:74 }, { i:2, beat:2, w:76 }, { i:3, beat:3, w:77 }];
+let sf = new ScoreFollower(tg), m0 = new TempoMap(500, 0, 0);
+const r1 = sf.push({ t:0, w:72 }, m0), r2 = sf.push({ t:510, w:74 }, m0), r3 = sf.push({ t:1000, w:70 }, m0), r4 = sf.push({ t:1500, w:89 }, m0);
+ok(r1.ok && r2.ok && r3 && !r3.ok && r3.j === 2 && r4 && r4.ok && r4.j === 3, 'dogru, dogru, zamaninda yanlis perde, oktav kaymis dogru');
+sf = new ScoreFollower(tg); sf.push({ t:0, w:72 }, m0);
+ok(sf.push({ t:1000, w:76 }, m0).skip === 1, 'atlanan nota sayiliyor');
+sf = new ScoreFollower(tg); sf.push({ t:0, w:72 }, m0);
+ok(sf.skipPast(1900, m0).join() === '1,2' && sf.k === 3, 'sabit tempoda zamani gecen notalar kacirildi sayiliyor');
+ok(followWait(500) === 550 && followWait(1000) === 850, 'bekleme esigi');
+const sm = playSummary([{ ok:true, off:20 }, { ok:true, off:200 }, { ok:false, off:0 }, null], 90);
+ok(sm.pct === 50 && sm.timePct === 25 && sm.missed === 1 && sm.wrong === 1, 'calis ozeti: dogru nota ve zamaninda yuzdesi');
 
 console.log('\n[23] Uygulama dosyalari');
 const scripts = [...html.matchAll(/<script src="([^"]+)"/g)].map(m=>m[1]);

@@ -31,7 +31,12 @@ const Songs = (() => {
                       en:"Chords copied. Paste the lyrics below, press “Match to chords”, then Save." },
     "song.pasteFirst":{ tr:"Önce sözleri yapıştır.", en:"Paste the lyrics first." },
     "song.template":{ tr:"[Am]Birinci satır [F]sözleri\n[C]ikinci [G*2]satır", en:"[Am]First line [F]lyrics\n[C]second [G*2]line" },
-    "song.delete":  { tr:"“{title}” silinsin mi?", en:"Delete “{title}”?" }
+    "song.delete":  { tr:"“{title}” silinsin mi?", en:"Delete “{title}”?" },
+    "song.band":    { tr:"Grup eşliği (davul + bas)", en:"Backing band (drums + bass)" },
+    "song.phones":  { tr:"Kulaklık takılı", en:"Wearing headphones" },
+    "song.bandSafe":{ tr:"Kulaklık yokken birlikte çalarken grup yalnız alçak bas ve tok davulla çalar (mikrofon vuruşlarını karıştırmasın diye).",
+                      en:"Without headphones, while you play along the band plays only low bass and kick (so the microphone doesn't confuse it with your strokes)." },
+    "song.bandStyle":{ tr:"Eşlik: {name}", en:"Backing: {name}" }
   });
   const selEl=$("songsel"), rhyEl=$("songrhy"), bpmEl=$("songbpm"), metaEl=$("songmeta"), sheetEl=$("songsheet"),
         chordsEl=$("songchords"), nowEl=$("songnow"), resEl=$("songres"), stopBtn=$("songstop"),
@@ -39,6 +44,23 @@ const Songs = (() => {
   let user = store.get("songs", []);            // [{ id, title, text, rhythm, bpm, capo?, source? }]
   let song = null, parsed = null, playing = null, totals = null, lastLine = null;
 
+  // Grup eşliği denetimleri (vuruş seçiminin altında)
+  const bandRow = document.createElement("div");
+  bandRow.className = "pcparts";
+  bandRow.innerHTML = '<label class="chk"><input type="checkbox" id="songband"> <span></span></label><label class="chk"><input type="checkbox" id="songphones"> <span></span></label><span class="reg" id="songbandstyle"></span>';
+  metaEl.before(bandRow);
+  const bandEl = $("songband"), phonesEl = $("songphones");
+  bandEl.checked = store.get("songBand", true); phonesEl.checked = Band.headphones;
+  bandEl.addEventListener("change", () => { store.set("songBand", bandEl.checked); bandText(); });
+  phonesEl.addEventListener("change", () => Band.setHeadphones(phonesEl.checked));
+  Bus.on("headphones", () => { phonesEl.checked = Band.headphones; bandText(); });
+  function bandText(){
+    bandRow.children[0].lastChild.textContent = t("song.band");
+    bandRow.children[1].lastChild.textContent = t("song.phones");
+    const g = grooveById(RHYTHM_GROOVE[rhyEl.value]);
+    $("songbandstyle").textContent = bandEl.checked && g ? t("song.bandStyle", { name: L(g, "name") }) + (Band.headphones ? "" : " · " + t("song.bandSafe")) : "";
+  }
+  rhyEl.addEventListener("change", bandText);
   function fillRhythms(){ const v = rhyEl.value; rhyEl.replaceChildren(...RHYTHMS.map(r => new Option(L(r, "name") + " · " + r.meter.split(" ")[0], r.id))); if(v) rhyEl.value = v; }
   fillRhythms();
   function all(){ return [...SONGS, ...user]; }
@@ -59,7 +81,7 @@ const Songs = (() => {
   function load(id, init = false){
     song = all().find(s => s.id === id) || SONGS[0];
     selEl.value = song.id; store.set("song", song.id);
-    rhyEl.value = song.rhythm; bpmEl.value = song.bpm;
+    rhyEl.value = song.rhythm; bpmEl.value = song.bpm; bandText();
     metaEl.textContent = song.meta ? L(song, "meta") : t("song.ownMeta");
     if(song.source){
       const a = document.createElement("a");
@@ -131,6 +153,13 @@ const Songs = (() => {
     const ok = await Rhythm.start({
       mode, rhythm, bpm, click: mode === "play", countIn: true, maxBars: bars.length,
       chordAt: b => chordBySymbol(bars[b]),
+      // Grup: akorun duyulan sesi (capo hesaba katılır); akoru sen ya da örnek ses çaldığı için grupta akor yok
+      onBarAudio: bandEl.checked && grooveById(RHYTHM_GROOVE[rhythm.id]) ? (bar, t0, barSec) => {
+        const c = chordBySymbol(bars[bar]);
+        if(!c || bar >= bars.length) return;
+        Band.songBar(grooveById(RHYTHM_GROOVE[rhythm.id]), bar, { root: (c.root + Chords.capo) % 12, type: c.type }, t0, barSec,
+          { micSafe: mode === "play" && !Band.headphones, parts: { chord:false }, gain: mode === "play" ? 0.6 : 0.75 });
+      } : null,
       onSlot: k => {
         const n = rhythm.slots.length, bar = Math.floor(k / n);
         if(k < 0){ nowEl.textContent = t("song.ready", { n: rhythm.beats.filter(x => x <= k + n).map((_, j) => j+1).join(" ") }); return; }
@@ -211,6 +240,7 @@ const Songs = (() => {
   });
 
   Bus.on("capo", () => render());
+  Bus.on("lang", () => { bandText(); }); 
   Bus.on("lang", () => { const id = song.id; fillRhythms(); buildSelect(); if(!id.startsWith("u-yeni")) load(id, true); if(!playing) resEl.innerHTML = RES_HINT(); });
   buildSelect(); load(store.get("song", SONGS[0].id), true);
   return { open(id){ load(id); } };
