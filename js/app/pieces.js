@@ -89,7 +89,12 @@ const Pieces = (() => {
     "pc.archFail": { tr:"Arşiv yüklenemedi (internet yok ve önbellekte değil).", en:"Couldn't load the archive (offline and not cached)." },
     "pc.comma":    { tr:"koma sapması %{n}", en:"comma deviation {n}%" },
     "pc.archMeta": { tr:"{by} · {makam} · {form} · {usul} · {n} ölçü · ♩ = {bpm} · {comma}", en:"{by} · {makam} · {form} · {usul} · {n} bars · ♩ = {bpm} · {comma}" },
-    "pc.anon":     { tr:"Anonim", en:"Anonymous" }
+    "pc.anon":     { tr:"Anonim", en:"Anonymous" },
+    "pc.xml":      { tr:"MusicXML / .mxl dosyası aç", en:"Open a MusicXML / .mxl file" },
+    "pc.xmlHelp":  { tr:"MuseScore, Finale, Sibelius ya da nota sitelerinden indirdiğin MusicXML dosyası. Gitar partisi olduğu gibi, başka çalgılar gitar yazımına çevrilir; akorlar varsa grup onlarla çalar. Dosya cihazdan çıkmaz.",
+                     en:"A MusicXML file from MuseScore, Finale, Sibelius or a sheet-music site. Guitar parts are taken as written, other instruments are converted to guitar notation; if it has chord symbols the band plays them. The file never leaves your device." },
+    "pc.xmlBad":   { tr:"Dosya okunamadı (MusicXML değil ya da nota yok).", en:"Couldn't read the file (not MusicXML or no notes)." },
+    "pc.xmlOk":    { tr:"“{title}” eklendi: {n} nota, {b} ölçü.", en:"Added “{title}”: {n} notes, {b} bars." }
   });
   const root = $("pcroot");
   let user = store.get("pieces", []);
@@ -159,6 +164,9 @@ const Pieces = (() => {
         <div class="err" id="pcederr" aria-live="polite"></div>
         <div class="cbtns"><button type="button" class="primary small" id="pcsave">${t("pc.save")}</button>
           <button type="button" class="stopbtn" id="pcnew">${t("pc.new")}</button><button type="button" class="stopbtn" id="pcdel">${t("pc.del")}</button></div>
+        <p class="lead">${t("pc.xmlHelp")}</p>
+        <div class="cbtns"><button type="button" class="stopbtn" id="pcxml">${t("pc.xml")}</button>
+          <input type="file" id="pcxmlfile" accept=".xml,.musicxml,.mxl,application/vnd.recordare.musicxml+xml,application/vnd.recordare.musicxml" hidden></div>
       </details>
     </section>`;
     $("pcsel").addEventListener("change", () => { stop(); load($("pcsel").value); });
@@ -180,6 +188,25 @@ const Pieces = (() => {
     $("pcsave").addEventListener("click", edSave);
     $("pcnew").addEventListener("click", () => { editing = null; $("pcedtitle").value = ""; $("pcedtext").value = t("pc.template"); $("pcedmeter").value = "4/4"; $("pcedkey").value = "Am"; edCheck(); });
     $("pcdel").addEventListener("click", edDelete);
+    $("pcxml").addEventListener("click", () => $("pcxmlfile").click());
+    $("pcxmlfile").addEventListener("change", async () => {
+      const f = $("pcxmlfile").files[0]; $("pcxmlfile").value = "";
+      if(!f) return;
+      let d = null;
+      try{
+        const buf = await f.arrayBuffer(), u8 = new Uint8Array(buf);
+        const xml = u8[0] === 0x50 && u8[1] === 0x4b ? await unzipFirstScore(buf) : new TextDecoder().decode(u8);
+        d = parseMusicXML(xml);
+      }catch(e){ d = null; }
+      if(!d || !d.notes.some(n => n[0] !== null)){ $("pcederr").textContent = t("pc.xmlBad"); return; }
+      const title = d.title || f.name.replace(/\.[^.]+$/, ""), meter = d.num + "/" + d.den, beats = d.num*4/d.den;
+      const g = GROOVES.find(x => Math.abs(x.beats - beats) < 1e-9) || autoGroove(d.num, d.den);
+      const s = { id: "u-" + Date.now(), title, meter, key: d.key, bpm: d.bpm, groove: g.id, group:"user", by:"", data: d };
+      user.push(s); store.set("pieces", user);
+      build(); await load(s.id);
+      $("pceditor").open = true;
+      $("pcederr").textContent = t("pc.xmlOk", { title, n: d.notes.filter(n => n[0] !== null).length, b: d.bars.length });
+    });
     $("pcarch").addEventListener("toggle", () => { if($("pcarch").open) archOpen(); });
     ["pcaq", "pcamk", "pcaf", "pcapop", "pcaeasy"].forEach(id => $(id).addEventListener(id === "pcaq" ? "input" : "change", archList));
     $("pcalist").addEventListener("click", e => { const b = e.target.closest("[data-id]"); if(!b) return;
@@ -197,7 +224,7 @@ const Pieces = (() => {
   async function load(id){
     if(typeof id === "string" && id.startsWith("tsm:")) return loadArch(id.slice(4));
     piece = all().find(p => p.id === id) || PIECES[0];
-    setup(parsePiece(piece.text, piece.meter));
+    setup(piece.data ? pdataParse(piece.data) : parsePiece(piece.text, piece.meter));
   }
   // ---- TSM nota arşivi (notalar/, js/core/archive.js) ----
   let archIdx = null, archBusy = null;
@@ -263,7 +290,7 @@ const Pieces = (() => {
     meta(); render(); buildLearn(); safeNote(); say(""); $("pcres").innerHTML = "";
     const mine = piece.id.startsWith("u-");
     $("pcdel").disabled = !mine;
-    if(mine){ editing = piece.id; $("pcedtitle").value = piece.title; $("pcedtext").value = piece.text; $("pcedmeter").value = piece.meter; $("pcedkey").value = piece.key; }
+    if(mine){ editing = piece.id; $("pcedtitle").value = piece.title; $("pcedtext").value = piece.text || ""; $("pcedmeter").value = piece.meter; $("pcedkey").value = piece.key; }
   }
   function meta(){
     const full = parsed.bars.filter(b => b.full).length;

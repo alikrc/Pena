@@ -47,6 +47,9 @@ Mikrofondan çaldığını dinler ve geri bildirim verir. Ses cihazda işlenir, 
   (Üsküdar'a Gider İken, İstiklal Marşı, Fikrimin İnce Gülü, Bülbülüm Altın Kafeste, Çayda Çıra, Harmandalı, Gurub Etti
   Güneş, Kürdîlihicazkâr Longa, Nikrîz Sirto…). Arşiv `node scripts/symbtr.js [Sol-Klarnet klasörü]` ile üretilir;
   veri CC BY-NC-SA 4.0 (SymbTr, M. K. Karaosmanoğlu, MTG–UPF).
+- **MusicXML / .mxl içe aktarma** (Parçalar → Kendi parçanı yaz): MuseScore, Finale, Sibelius ya da nota sitelerinden indirilen
+  dosya. Gitar partisi yazıldığı gibi, diğer çalgılar gitar yazımına çevrilir; bağlar, ön vuruş, donanım, tempo ve harmony
+  akorları alınır (grup bu akorlarla çalar); çeyrek sesler en yakın yarım sese yuvarlanır.
 - **Şarkılarda grup eşliği**: Türkçe pop/rock, türküler ve yabancı şarkılar seçili vuruşa uyan kalıpla (davul + bas,
   capo hesaba katılarak) çalınır; birlikte çalarken de.
 - **Kulaktan çıkar**: ses ya da video dosyasını aç; dalga biçiminde dokunarak konum, sürükleyerek bölge seç; perdesini bozmadan

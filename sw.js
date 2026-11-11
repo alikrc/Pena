@@ -1,7 +1,7 @@
 // Çevrimdışı kullanım: uygulama dosyaları önbellekte tutulur.
 // Kendi dosyalarımız önce ağdan istenir (güncellemeler hemen gelsin), ağ yoksa önbellekten verilir.
 // Fontlar uygulamayla birlikte gelir (fonts/), ayrıca indirilmez.
-const CACHE = "gitar-v17";
+const CACHE = "gitar-v18";
 const SHELL = [
   "./",
   "index.html",
@@ -28,6 +28,7 @@ const SHELL = [
   "js/core/transcribe.js",
   "js/core/progress.js",
   "js/core/reading.js",
+  "js/core/musicxml.js",
   "notalar/index.json",
   "js/core/ear.js",
   "js/core/lessons.js",

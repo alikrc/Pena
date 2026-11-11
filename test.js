@@ -1,6 +1,6 @@
 // Testler: js/core/*.js dosyaları tarayıcıdaki sırayla bir vm bağlamına yüklenir ve oradaki adlar kullanılır.
 const fs = require('fs'), path = require('path'), vm = require('vm');
-const CORE = ['i18n', 'music', 'guitar', 'chords', 'rhythm', 'songs', 'band', 'follow', 'pieces', 'archive', 'transcribe', 'progress', 'reading', 'ear', 'lessons'];
+const CORE = ['i18n', 'music', 'guitar', 'chords', 'rhythm', 'songs', 'band', 'follow', 'pieces', 'archive', 'transcribe', 'progress', 'reading', 'musicxml', 'ear', 'lessons'];
 const ctx = vm.createContext({ console });
 for(const f of CORE) vm.runInContext(fs.readFileSync(path.join(__dirname, 'js/core', f + '.js'), 'utf8'), ctx, { filename: f + '.js' });
 const core = new Proxy({}, { get: (_, k) => vm.runInContext(String(k), ctx) });
@@ -544,6 +544,26 @@ ok(hw > 150, 'zorlanilan nota daha sik soruluyor', hw + '/400');
 const dm = dictMelody(2, 5, rnd), rc = rhythmChoices('4/4', 2, rnd);
 ok(dm.length === 5 && dm.every(w => READ_LEVELS[1].pool.includes(w)) && rc.choices.length === 4 && rc.choices.every(c => Math.abs(c.reduce((a, b) => a + b, 0) - 4) < 1e-9) &&
    new Set(rc.choices.map(c => c.join())).size === 4, 'dikte: ezgi havuzdan, dort farkli ritim secenegi');
+
+console.log('\n[31] MusicXML ice aktarma');
+const { parseMusicXML, pdataParse } = core;
+const XML = `<?xml version="1.0"?><score-partwise><work><work-title>Deneme</work-title></work><part-list><score-part id="P1"><part-name>Piano</part-name></score-part></part-list>
+<part id="P1"><measure number="0"><attributes><divisions>2</divisions><key><fifths>1</fifths></key><time><beats>3</beats><beat-type>4</beat-type></time></attributes>
+<sound tempo="88"/><note><pitch><step>D</step><octave>4</octave></pitch><duration>2</duration><voice>1</voice></note></measure>
+<measure number="1"><harmony><root><root-step>G</root-step></root><kind>major</kind></harmony>
+<note><pitch><step>G</step><octave>4</octave></pitch><duration>2</duration><voice>1</voice><tie type="start"/></note>
+<note><pitch><step>G</step><octave>4</octave></pitch><duration>2</duration><voice>1</voice><tie type="stop"/></note>
+<note><chord/><pitch><step>B</step><octave>4</octave></pitch><duration>2</duration><voice>1</voice></note>
+<note><pitch><step>F</step><alter>1</alter><octave>4</octave></pitch><duration>1</duration><voice>1</voice></note>
+<note><rest/><duration>1</duration><voice>1</voice></note>
+<backup><duration>6</duration></backup><note><pitch><step>G</step><octave>2</octave></pitch><duration>6</duration><voice>2</voice></note></measure>
+<measure number="2"><harmony><root><root-step>E</root-step></root><kind>minor</kind></harmony><note><pitch><step>E</step><octave>4</octave></pitch><duration>6</duration><voice>1</voice></note></measure></part></score-partwise>`;
+const xd = parseMusicXML(XML), xp = pdataParse(xd);
+ok(xd.title === 'Deneme' && xd.num === 3 && xd.den === 4 && xd.key === 'G' && xd.bpm === 88, 'baslik, olcu, donanim ve tempo');
+ok(xd.notes.map(n => n[0] === null ? 'r' : n[0]).join() === '74,83,78,r,76' && xd.notes[1][1] === 2, 'piyano partisi bir oktav tiz (gitar yazimi); bagli notalar birlesir, akorun tizi ezgi, ikinci ses atlanir',
+   xd.notes.map(n => n.join(':')).join(' '));
+ok(xd.chords.map(c => c.join(':')).join() === '1:G,4:Em' && xd.bars.length === 3 && xd.bars[0][1] === 1, 'harmony akorlari ve on vurus olcusu', JSON.stringify(xd.chords));
+ok(xp.bars[1].full && !xp.bars[0].full && xp.notes[2].sp.a === 1 && xp.chordAt(2) === 'G' && xp.bars[2].first === 4, 'Parcalar yapisi: tam olcu, diyez, akor, olcu basi');
 
 console.log('\n[23] Uygulama dosyalari');
 const scripts = [...html.matchAll(/<script src="([^"]+)"/g)].map(m=>m[1]);
