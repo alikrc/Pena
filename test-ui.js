@@ -77,7 +77,7 @@ const tick = (ms = 0) => new Promise(r => setTimeout(r, ms));
   console.log('\n[UI 1] Yükleme ve sekmeler');
   ok(errors.length === 0, 'sayfa betik hatası olmadan yükleniyor', errors.slice(0, 3).join(' | '));
   const tabs = [...doc.querySelectorAll('#tabs [role=tab]')];
-  ok(tabs.length === 10 && visible().join() === 'panel-dersler', 'ilk açılışta yalnız Dersler paneli görünür', visible().join());
+  ok(tabs.length === 12 && visible().join() === 'panel-dersler', 'ilk açılışta yalnız Dersler paneli görünür', visible().join());
   let tabErr = [];
   for(const t of tabs){
     click(t);
@@ -218,6 +218,15 @@ const tick = (ms = 0) => new Promise(r => setTimeout(r, ms));
   ok($('pcederr').textContent.includes('Hatalı'), 'hatalı ölçü bildiriliyor');
   $('pcpct').value = 100; $('pcpct').dispatchEvent(new win.Event('input'));
   click(tabs.find(t => t.id === 'tab-ezgiler'));
+
+  console.log('\n[UI 6c] İlerleme, Kayıt, Kulaktan çıkar');
+  g('Bus').emit('achieve', { type:'piece', id:'ode', title:'Neşeye Övgü', pct:77 });
+  click(tabs.find(t => t.id === 'tab-ilerleme'));
+  ok($('prroot').textContent.includes('Neşeye Övgü') && $('prroot').textContent.includes('%77') && !!$('prgoal'), 'İlerleme: rekor ve günlük hedef görünüyor');
+  click(tabs.find(t => t.id === 'tab-kayit')); await tick(50);
+  ok(!!$('rcbtn') && $('rcroot').textContent.includes('Henüz kayıt yok'), 'Kayıt sekmesi açılıyor');
+  click(tabs.find(t => t.id === 'tab-kulaktan'));
+  ok(!!$('kfopen') && $('kfwrap').hidden, 'Kulaktan çıkar: dosya açma düğmesi');
 
   console.log('\n[UI 7] Ezgiler ve kulak');
   ok(doc.querySelectorAll('#melnotes .mnote').length === win.parseMelody(win.melodyById('nese').text).notes.length, 'Neşeye Övgü nota kartları');

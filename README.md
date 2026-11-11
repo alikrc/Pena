@@ -53,6 +53,11 @@ Mikrofondan çaldığını dinler ve geri bildirim verir. Ses cihazda işlenir, 
   %25–125 hız (WSOLA), ±12 yarım ses ve ±50 sent kaydırma (farklı akortlu kayıtlar için), A–B döngü, işaretler, bölgeye
   yakınlaşma. Perde izi gitar notası adlarıyla çizilir; çalan yerin notası, teli ve perdesi yazar. Seçili bölge notaya dökülüp
   Parçalar'a eklenir (tempo nota aralıklarından tahmin edilir, süreler on altılığa yuvarlanır). Dosya cihazdan çıkmaz.
+- **Kayıt**: kendini kaydet (en çok 3 dk), dinle, indir; perde eğrisi, nota dökümü, entonasyon (notaların tam sesten ortalama
+  sapması, pes/tiz eğilimi) ve en çok kayan notalar. İki kaydı karşılaştır: üst üste perde eğrileri ve sapma farkı. Kayıtlar
+  yalnız cihazda (IndexedDB), son 50, ★ olanlar silinmez.
+- **İlerleme**: mikrofon açıkken çaldığın süre gün gün; seri ve en uzun seri, günlük hedef, son 14 gün, bu hafta / geçen hafta;
+  parçalar, şarkılar, ritim, akor değiştirme ve kulaktan rekorlar; bütün ilerlemeyi tek JSON dosyasına yedekleme ve geri yükleme.
 - **Ezgiler**: nota nota çalma; her notanın teli, perdesi ve parmağı komşu notalara göre seçilir (pozisyon planı), tab. Doğru notayı
   duyunca sıradakine geçer, yanlışta ne duyduğunu söyler. Kendi ezgini `Mi4 Re4 Do4:2` biçiminde yazabilirsin.
 - **Kulak**: majör/minör, majör/minör/yedili, aralıklar, hangi açık tel; 10 soruluk turlar, en iyi puan.

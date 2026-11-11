@@ -704,3 +704,23 @@ details.learn .steps li.done b{color:var(--ok)}
 .kfnow b{font:600 18px var(--display);color:var(--accent)}
 .kfmarks{display:flex;flex-wrap:wrap;gap:6px}
 .kfmk{display:inline-flex;gap:2px}
+
+/* ---- İlerleme ve Kayıt ---- */
+.prtop{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:14px}
+.prstat{background:var(--sunk);border-radius:12px;padding:10px 12px;display:grid;gap:4px}
+.prstat b{font:600 24px var(--display)}
+.prstat small{color:var(--muted);font-size:12.5px}
+.prgoal{height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.prgoal i{display:block;height:100%;background:var(--ok)}
+.prchart{width:100%;max-width:520px;height:auto;display:block;margin:4px 0 12px}
+.prbar{fill:var(--teal);opacity:.55}.prbar.ok{fill:var(--ok);opacity:1}
+.prday{font:10px var(--ui);fill:var(--muted);text-anchor:middle}
+.prgl{stroke:var(--accent);stroke-dasharray:3 3;stroke-width:1}
+.prrecs{list-style:none;margin:6px 0 12px;padding:0;display:grid;gap:4px}
+.prrecs li{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 10px;border-radius:10px;background:var(--sunk)}
+.prrecs li.on{outline:2px solid var(--teal)}
+.prrecs span{display:grid;gap:2px}.prrecs small{color:var(--muted);font-size:12px}
+.prrecs em{font:600 16px var(--display);font-style:normal;color:var(--ok)}
+.rclist .cbtns{display:flex;flex-wrap:wrap;gap:4px;margin:0}
+.rcnotes{font:13px var(--mono);color:var(--muted);line-height:1.7;word-spacing:2px}
+.primary.rec{background:#C0392B}

@@ -1,6 +1,6 @@
 // Testler: js/core/*.js dosyaları tarayıcıdaki sırayla bir vm bağlamına yüklenir ve oradaki adlar kullanılır.
 const fs = require('fs'), path = require('path'), vm = require('vm');
-const CORE = ['i18n', 'music', 'guitar', 'chords', 'rhythm', 'songs', 'band', 'follow', 'pieces', 'archive', 'transcribe', 'ear', 'lessons'];
+const CORE = ['i18n', 'music', 'guitar', 'chords', 'rhythm', 'songs', 'band', 'follow', 'pieces', 'archive', 'transcribe', 'progress', 'ear', 'lessons'];
 const ctx = vm.createContext({ console });
 for(const f of CORE) vm.runInContext(fs.readFileSync(path.join(__dirname, 'js/core', f + '.js'), 'utf8'), ctx, { filename: f + '.js' });
 const core = new Proxy({}, { get: (_, k) => vm.runInContext(String(k), ctx) });
@@ -512,6 +512,16 @@ const tr = runGen(pitchTraceGen(mel, SR)), tn = traceNotes(tr);
 ok(tn.map(n => n.w).join() === '67,69,71', 'perde izinden notalar: yazili Sol4 La4 Si4', tn.map(n => n.w).join());
 const pcx = notesToPiece(tn, 120), ppz = parsePiece(pcx.text, '4/4');
 ok(ppz.errors.length === 0 && [...new Set(ppz.notes.filter(n => n.w !== null).map(n => n.w))].join() === '67,69,71' && !ppz.notes.slice(0, -1).some(n => n.w === null) && pcx.bpm === 120, 'notalar Parcalar yazimina donuyor', pcx.text);
+
+console.log('\n[29] Ilerleme: seri, son gunler, rekorlar');
+const { dayKey, addDays, streak, bestStreak, lastDays, records } = core;
+ok(addDays('2026-02-28', 1) === '2026-03-01' && addDays('2026-01-01', -1) === '2025-12-31', 'gun ekleme ay ve yil gecisinde');
+const dd = { '2026-11-07': 300, '2026-11-08': 90, '2026-11-09': 30, '2026-11-10': 600, '2026-11-11': 120 };
+ok(streak(dd, '2026-11-11') === 2 && streak(dd, '2026-11-12') === 2 && streak(dd, '2026-11-13') === 0, 'seri: 1 dakikadan az calisilan gun seriyi bozar; bugun henuz calisilmadiysa dunden sayilir');
+ok(bestStreak(dd) === 2 && lastDays(dd, '2026-11-11', 3).map(d => d.sec).join() === '30,600,120', 'en uzun seri ve son gunler');
+const rr = records([{ t:1, type:'piece', id:'ode', pct:50 }, { t:2, type:'piece', id:'ode', pct:80, title:'Ode' }, { t:3, type:'changes', pair:['Am','Em'], perMin:22 }, { t:4, type:'ear', mode:'mm', correct:7, total:10 }]);
+ok(rr.length === 3 && rr.find(r => r.type === 'piece').best === 80 && rr.find(r => r.type === 'piece').n === 2 && rr.find(r => r.type === 'ear').best === 70 && rr[0].type === 'ear',
+   'rekorlar: tur ve kimlik basina en iyi, deneme sayisi, son yapilan basta');
 
 console.log('\n[23] Uygulama dosyalari');
 const scripts = [...html.matchAll(/<script src="([^"]+)"/g)].map(m=>m[1]);

@@ -437,7 +437,7 @@ const Pieces = (() => {
     if(s.pct >= 85 || s.pct < 60) html += "<br>" + t(s.pct >= 85 ? "pc.tipGood" : "pc.tipSlow");
     stop();
     $("pcres").innerHTML = html;
-    Bus.emit("achieve", { type:"piece", id: piece.id, mode: R.mode, pct: s.pct, timePct: s.timePct, speed: Math.round(R.p*100) });
+    Bus.emit("achieve", { type:"piece", id: piece.id, title: L(piece, "title"), mode: R.mode, pct: s.pct, timePct: s.timePct, speed: Math.round(R.p*100) });
     if(R.o.onDone) R.o.onDone(s);
   }
   function stop(keep){
