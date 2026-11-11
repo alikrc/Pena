@@ -108,7 +108,7 @@ const Staff = (() => {
           g.appendChild(svgEl("ellipse", { class: hollow ? "head hol" : "head", cx, cy: sy(st), rx:5.4, ry:3.9, transform:`rotate(-20 ${cx} ${sy(st)})` }));
           if(n.showAcc === "0") g.appendChild(svgEl("path", { class:"nat", d: naturalPath(cx - 13, sy(st)) }));
           else if(n.showAcc) g.appendChild(svgEl("text", { class:"acc", x: cx - 13, y: sy(st) + 5 }, ACC[n.showAcc]));
-          if([3, 1.5, 0.75].includes(n.dur)) g.appendChild(svgEl("circle", { class:"dot", cx: cx + 9, cy: sy(st % 2 ? st : st + 1), r:1.7 }));
+          if([6, 3, 1.5, 0.75, 0.375].includes(n.dur)) g.appendChild(svgEl("circle", { class:"dot", cx: cx + 9, cy: sy(st % 2 ? st : st + 1), r:1.7 }));
           if(n.dur < 4){
             const up = stemUp.has(j) ? stemUp.get(j) : st < 4, sxp = up ? cx + 5 : cx - 5;
             let ye = up ? sy(st) - 27 : sy(st) + 27;
@@ -119,7 +119,7 @@ const Staff = (() => {
             }
             g.appendChild(svgEl("line", { class:"stem", x1: sxp, x2: sxp, y1: sy(st), y2: ye }));
             if(!b && n.dur < 1){
-              const fl = n.dur <= 0.25 ? 2 : 1;
+              const fl = n.dur <= 0.125 ? 3 : n.dur <= 0.375 && n.dur !== 0.5 ? 2 : 1;
               for(let f = 0; f < fl; f++){
                 const yy = ye + (up ? f*6 : -f*6);
                 g.appendChild(svgEl("path", { class:"flag", d: up ? `M${sxp} ${yy}c2 6 9 8 6 16` : `M${sxp} ${yy}c2 -6 9 -8 6 -16` }));

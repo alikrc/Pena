@@ -324,7 +324,7 @@ a{color:var(--teal)}
 .mini-chord svg{width:78px;height:auto}
 textarea{width:100%;min-height:140px;font:14px/1.5 var(--mono);color:var(--ink);background:var(--surface);
   border:1px solid var(--line);border-radius:10px;padding:10px}
-input[type=text],input[type=number].num{font:500 14px var(--ui);color:var(--ink);background:var(--surface);
+input[type=text],input[type=search],input[type=number].num{font:500 14px var(--ui);color:var(--ink);background:var(--surface);
   border:1px solid var(--line);border-radius:8px;padding:6px 8px}
 input[type=number].num{width:72px;font-family:var(--mono)}
 details.editor{margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
@@ -499,7 +499,7 @@ details.help .lead{margin:0}
   .stopbtn,.primary.small,.cgroups button,.progs button,.alts button{min-height:40px}
   .seg button{min-height:40px;padding-inline:16px}
   .mini{width:40px;height:40px}
-  select,input[type=text],input[type=number].num,#a4{min-height:40px}
+  select,input[type=text],input[type=search],input[type=number].num,#a4{min-height:40px}
 }
 
 /* ---- Tablet: solda simgeli dar menü ---- */
@@ -689,3 +689,9 @@ details.learn .steps li span{display:grid;gap:2px}
 details.learn .steps li small{color:var(--muted);font-size:12.5px;line-height:1.4}
 details.learn .steps li.done b{color:var(--ok)}
 #pcedtext{min-height:110px}
+.alist{list-style:none;margin:6px 0 8px;padding:0;display:grid;gap:4px;max-height:46vh;overflow-y:auto}
+.alist button{width:100%;text-align:left;display:grid;gap:2px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;
+  background:var(--surface);color:var(--ink);font:500 14px var(--ui)}
+.alist button:hover{border-color:var(--teal)}
+.alist small{color:var(--muted);font-size:12px}
+.alist .more{font-size:12.5px;color:var(--muted);padding:4px 10px}

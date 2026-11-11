@@ -1,6 +1,6 @@
 // Testler: js/core/*.js dosyaları tarayıcıdaki sırayla bir vm bağlamına yüklenir ve oradaki adlar kullanılır.
 const fs = require('fs'), path = require('path'), vm = require('vm');
-const CORE = ['i18n', 'music', 'guitar', 'chords', 'rhythm', 'songs', 'band', 'follow', 'pieces', 'ear', 'lessons'];
+const CORE = ['i18n', 'music', 'guitar', 'chords', 'rhythm', 'songs', 'band', 'follow', 'pieces', 'archive', 'ear', 'lessons'];
 const ctx = vm.createContext({ console });
 for(const f of CORE) vm.runInContext(fs.readFileSync(path.join(__dirname, 'js/core', f + '.js'), 'utf8'), ctx, { filename: f + '.js' });
 const core = new Proxy({}, { get: (_, k) => vm.runInContext(String(k), ctx) });
@@ -468,6 +468,36 @@ ok(sf.skipPast(1900, m0).join() === '1,2' && sf.k === 3, 'sabit tempoda zamani g
 ok(followWait(500) === 550 && followWait(1000) === 850, 'bekleme esigi');
 const sm = playSummary([{ ok:true, off:20 }, { ok:true, off:200 }, { ok:false, off:0 }, null], 90);
 ok(sm.pct === 50 && sm.timePct === 25 && sm.missed === 1 && sm.wrong === 1, 'calis ozeti: dogru nota ve zamaninda yuzdesi');
+
+console.log('\n[27] TSM nota arsivi (komasiz gitar)');
+const { commaSpell, archParse, archCommaError, archDrone, autoGroove } = core;
+ok(commaSpell(0).semi === 0 && commaSpell(0).a === 0 && commaSpell(9).l === 5 && commaSpell(22).l === 0, 'Rast Sol, Dugah La, Cargah Do');
+ok(commaSpell(13).semi === 3 && commaSpell(13).a === -1 && commaSpell(13).l === 6, 'Kurdi (13 koma) = Si bemol');
+ok(commaSpell(17).semi === 4 && commaSpell(17).a === 0, 'Segah (17 koma) gitarda Si');
+ok(commaSpell(49).a === 1 && commaSpell(49).l === 3 && commaSpell(-4).semi === -1, 'Eviç Fa diyez, Irak Fa diyez');
+const ARCH_DIR = path.join(__dirname, 'notalar');
+const aidx = JSON.parse(fs.readFileSync(path.join(ARCH_DIR, 'index.json'), 'utf8'));
+ok(aidx.pieces.length > 1000 && /CC BY-NC-SA/.test(aidx.source) && aidx.pieces.filter(x => x.pop).length >= 20, aidx.pieces.length + ' eser, kaynak ve lisans yazili, populer liste');
+let arErr = [];
+for(const x of aidx.pieces){
+  const j = JSON.parse(fs.readFileSync(path.join(ARCH_DIR, x.id + '.json'), 'utf8'));
+  if(j.notes.some(n => n.length > 2)) arErr.push(x.id + ': hece/susleme kalmis');
+  const p = archParse(j);
+  const ws = p.notes.filter(n => n.w !== null).map(n => n.w);
+  if(Math.min(...ws) < 52 || Math.max(...ws) > 96) arErr.push(x.id + ': gitar araligi disi');
+  const tot = p.bars.reduce((s, b) => s + b.len, 0);
+  if(Math.abs(tot - p.total) > 1e-6 || p.bars.some(b => b.first > p.notes.length)) arErr.push(x.id + ': olcu');
+  if(p.notes.some(n => n.w !== null && (n.sp.step < -12 || n.sp.step > 24))) arErr.push(x.id + ': dizek yeri');
+  if(!autoGroove(p.num, p.den)) arErr.push(x.id + ': usul kalibi');
+  if(arErr.length > 5) break;
+}
+ok(arErr.length === 0, 'butun arsiv eserleri ayristiriliyor: gitar araliginda, olculer tutarli, sozsuz', arErr.join(' | '));
+const usk = archParse(JSON.parse(fs.readFileSync(path.join(ARCH_DIR, 'nihavent--turku--nimsofyan--uskudara_gider--.json'), 'utf8')));
+ok(usk.bars.filter(b => b.full).length > 8 && archCommaError(usk) < 0.1 && archDrone(usk).iv.join() === '0,7', 'Uskudar\'a Gider Iken: tam olculer, az koma, karar demi');
+ok(['5/8','9/8','7/8','10/8','28/8'].every(m => { const [n, d] = m.split('/').map(Number), g = autoGroove(n, d);
+  return g.darbuka.length === g.cells && g.bass.length === g.cells && Math.abs(g.beats - n*4/d) < 1e-9 && g.darbuka[0] === 'D'; }), 'olcuden uretilen usul kaliplari');
+ok(grooveById('auto:9/8').beats === 4.5 && grooveBar(autoGroove(9, 8), 0, () => archDrone(usk)).some(e => e.part === 'bass'), 'auto: kalibi ve demle bas');
+
 
 console.log('\n[23] Uygulama dosyalari');
 const scripts = [...html.matchAll(/<script src="([^"]+)"/g)].map(m=>m[1]);

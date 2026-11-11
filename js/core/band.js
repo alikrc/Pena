@@ -59,7 +59,33 @@ const GROOVES = [
   { id:"zeybek", family:"tr", name:"Zeybek (9/4)", name_en:"Zeybek (9/4)", meter:"9/4", beats:9, cells:18, bpm:96,
     darbuka:"D...T.T.D...T...T.", fill:"D...T.T.D...TkTkTk", bass:"1.......5.........", chord:"....x.x.....x...x." }
 ];
-function grooveById(id){ return GROOVES.find(g => g.id === id) || null; }
+function grooveById(id){
+  if(typeof id === "string" && id.startsWith("auto:")){ const [n, d] = id.slice(5).split("/").map(Number); return n > 0 && d > 0 ? autoGroove(n, d) : null; }
+  return GROOVES.find(g => g.id === id) || null;
+}
+// Usulü elle yazılmamış ölçüler için darbuka kalıbı (Sol Klarnet band.js stylesFromStrokes): ölçü vuruş gruplarına
+// bölünür, ilk grup düm, diğerleri tek; uzun grupların ortasına ka. Bas ilk dümde kök, sonraki gruplarda beşli.
+const METER_GROUPS = { "2/4":[1,1], "3/4":[1,1,1], "4/4":[2,1,1], "3/8":[1,1,1], "5/8":[2,3], "6/8":[3,3], "6/4":[3,3], "7/8":[3,2,2],
+  "8/8":[3,3,2], "9/8":[2,2,2,3], "10/8":[3,2,2,3], "12/8":[3,3,3,3], "5/4":[2,3], "7/4":[3,2,2], "9/4":[2,2,2,3], "8/4":[2,2,2,2],
+  "2/2":[1,1], "4/2":[2,2], "1/4":[1], "2/8":[2], "4/8":[2,2] };
+const autoCache = {};
+function autoGroove(num, den){
+  const key = num + "/" + den;
+  if(autoCache[key]) return autoCache[key];
+  let g = METER_GROUPS[key];
+  if(!g){ g = []; let r = num; while(r > 0){ const x = r === 3 || r === 5 ? 3 : Math.min(2, r); g.push(x); r -= x; } }
+  let drum = "", bass = "", chord = "";
+  g.forEach((u, i) => {
+    const n = u*2;
+    drum += (i === 0 ? "D" : "T") + (n > 2 ? ".k".padEnd(n - 1, ".").slice(0, n - 1) : ".".repeat(n - 1));
+    bass += (i === 0 ? "1" : i === Math.floor(g.length/2) ? "5" : ".") + ".".repeat(n - 1);
+    chord += (i > 0 ? "x" : ".") + ".".repeat(n - 1);
+  });
+  const k = Math.max(2, Math.round(drum.length/4));
+  const fill = drum.slice(0, drum.length - k) + Array.from({ length:k }, (_, i) => i % 2 ? "k" : "T").join("");
+  return autoCache[key] = { id: "auto:" + key, family:"tr", name:"Usul " + key, name_en:"Usul " + key, meter: key, beats: num*4/den,
+    cells: drum.length, bpm: 90, darbuka: drum, fill, bass, chord };
+}
 // Şarkılar sekmesindeki vuruş kalıbına uyan grup kalıbı (ölçü süresi aynı olmalı)
 const RHYTHM_GROOVE = { dortluk:"ballad", sekizlik:"rock", pop:"pop", vals:"waltz", turkaksagi:"turkaksagi", aksak:"aksak" };
 // Bir ölçünün darbuka/davul çalışı: cümlenin (4 ölçü; 2 dörtlükten kısa ölçülerde 8) son ölçüsü dolgu
@@ -70,7 +96,7 @@ function grooveIsFill(g, bar){ const len = g.beats <= 2 ? 8 : 4; return bar % le
 function bassMidi(sym, kind = "1"){
   const c = typeof sym === "string" ? chordBySymbol(sym) : sym;
   if(!c) return null;
-  const iv = CHORD_TYPES[c.type].iv;
+  const iv = c.iv || CHORD_TYPES[c.type].iv;
   const off = kind === "5" ? (iv.includes(6) ? 6 : 7) : kind === "3" ? iv[1] : kind === "6" ? 9 : 0;
   const pc = (c.root + off) % 12, m = 28 + ((pc - 4 + 12) % 12);
   return kind === "8" ? m + 12 : m;
@@ -79,7 +105,8 @@ function bassMidi(sym, kind = "1"){
 function chordMidis(sym){
   const c = typeof sym === "string" ? chordBySymbol(sym) : sym;
   if(!c) return [];
-  return chordPcs(c).slice(0, 4).map(pc => 55 + ((pc - 7 + 12) % 12)).sort((a, b) => a - b);
+  const pcs = c.iv ? c.iv.map(i => (c.root + i) % 12) : chordPcs(c);
+  return pcs.slice(0, 4).map(pc => 55 + ((pc - 7 + 12) % 12)).sort((a, b) => a - b);
 }
 
 // Bir ölçünün olayları. chordAt(x): ölçü başından x dörtlük sonra çalan akor sembolü. parts: { drum, bass, chord } (varsayılan açık).
@@ -126,7 +153,9 @@ function pieceBandEvents(p, g, parts = {}){
   let n = 0;
   for(const bar of p.bars){
     if(!bar.full) continue;
-    for(const e of grooveBar(g, n++, x => p.chordAt(bar.start + x), parts)) out.push({ ...e, t: bar.start + e.b });
+    if(Math.abs(bar.len - g.beats) > 1e-6){ n++; continue; }          // usul değişen ölçü: bu kalıp oturmaz
+    const at = p.bandChordAt || p.chordAt;
+    for(const e of grooveBar(g, n++, x => at(bar.start + x), parts)) out.push({ ...e, t: bar.start + e.b });
   }
   return out;
 }

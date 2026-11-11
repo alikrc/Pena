@@ -40,6 +40,13 @@ Mikrofondan çaldığını dinler ve geri bildirim verir. Ses cihazda işlenir, 
   (Daha Dün Annemizin, Ali Baba'nın Çiftliği); Pena için yazılmış etütler (karşılama, çiftetelli, kasap havası, rock riff,
   12 ölçülük blues). Telifli şarkıların ezgisi eklenmedi. Kulaklık yokken grup hoparlörden yalnız alçak bas ve tok davul
   çalar (perde bulucunun ve vuruş yakalayıcının bandının altında); kulaklıkla bütün grup.
+- **TSM nota arşivi** (Parçalar sekmesinde): SymbTr'den 1221 eser — bestecisi kamu malı olanlar (telifli ve bestecisi bilinmeyen
+  979 eser alınmadı), sözsüz. Gitarda koma olmadığı için her perde en yakın yarım sese yuvarlanır (komasız TSM); her eserin
+  koma sapması gösterilir, “Gitara uygun (az koma)” süzgeci var. Donanım eserden tahmin edilir, eşlik usulün ölçüsünden
+  üretilen darbuka kalıbı ve karar perdesinde bas ile çalar. Ad/besteci araması, makam ve form süzgeci, ★ popüler eserler
+  (Üsküdar'a Gider İken, İstiklal Marşı, Fikrimin İnce Gülü, Bülbülüm Altın Kafeste, Çayda Çıra, Harmandalı, Gurub Etti
+  Güneş, Kürdîlihicazkâr Longa, Nikrîz Sirto…). Arşiv `node scripts/symbtr.js [Sol-Klarnet klasörü]` ile üretilir;
+  veri CC BY-NC-SA 4.0 (SymbTr, M. K. Karaosmanoğlu, MTG–UPF).
 - **Şarkılarda grup eşliği**: Türkçe pop/rock, türküler ve yabancı şarkılar seçili vuruşa uyan kalıpla (davul + bas,
   capo hesaba katılarak) çalınır; birlikte çalarken de.
 - **Ezgiler**: nota nota çalma; her notanın teli, perdesi ve parmağı komşu notalara göre seçilir (pozisyon planı), tab. Doğru notayı

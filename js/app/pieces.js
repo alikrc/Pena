@@ -74,7 +74,22 @@ const Pieces = (() => {
     "pc.mine":     { tr:"Kendi parçan", en:"Your own piece" },
     "pc.delAsk":   { tr:"“{title}” silinsin mi?", en:"Delete “{title}”?" },
     "pc.template": { tr:"[Am] A4 C5 E5 C5 | [G] D5:2 B4:2 | [Am] A4:4", en:"[Am] A4 C5 E5 C5 | [G] D5:2 B4:2 | [Am] A4:4" },
-    "pc.scoreAria":{ tr:"{title}: dizek ve tab", en:"{title}: staff and tab" }
+    "pc.scoreAria":{ tr:"{title}: dizek ve tab", en:"{title}: staff and tab" },
+    "pc.gTsm":     { tr:"TSM: popüler eserler", en:"Turkish classical: popular pieces" },
+    "pc.arch":     { tr:"TSM nota arşivi · {n} eser", en:"Turkish classical archive · {n} pieces" },
+    "pc.archLoad": { tr:"TSM nota arşivi", en:"Turkish classical archive" },
+    "pc.search":   { tr:"Ara: eser, besteci", en:"Search: piece, composer" },
+    "pc.makam":    { tr:"Makam", en:"Makam" }, "pc.form": { tr:"Form", en:"Form" }, "pc.all": { tr:"Hepsi", en:"All" },
+    "pc.popular":  { tr:"Popüler", en:"Popular" },
+    "pc.easy":     { tr:"Gitara uygun (az koma)", en:"Guitar-friendly (few commas)" },
+    "pc.found":    { tr:"{n} eser", en:"{n} pieces" },
+    "pc.more":     { tr:"… ve {n} eser daha; aramayı daralt.", en:"… and {n} more; narrow the search." },
+    "pc.archNote": { tr:"Gitarda koma yok: her perde en yakın yarım sese yuvarlanır (komasız TSM). Sözler alınmadı; yalnız bestecisi kamu malı olan eserler var. Kaynak: SymbTr (M. K. Karaosmanoğlu, MTG–UPF), CC BY-NC-SA 4.0.",
+                     en:"The guitar has no commas: each perde is rounded to the nearest semitone. Lyrics are not included; only pieces whose composer is in the public domain. Source: SymbTr (M. K. Karaosmanoglu, MTG–UPF), CC BY-NC-SA 4.0." },
+    "pc.archFail": { tr:"Arşiv yüklenemedi (internet yok ve önbellekte değil).", en:"Couldn't load the archive (offline and not cached)." },
+    "pc.comma":    { tr:"koma sapması %{n}", en:"comma deviation {n}%" },
+    "pc.archMeta": { tr:"{by} · {makam} · {form} · {usul} · {n} ölçü · ♩ = {bpm} · {comma}", en:"{by} · {makam} · {form} · {usul} · {n} bars · ♩ = {bpm} · {comma}" },
+    "pc.anon":     { tr:"Anonim", en:"Anonymous" }
   });
   const root = $("pcroot");
   let user = store.get("pieces", []);
@@ -96,7 +111,7 @@ const Pieces = (() => {
       <div class="row">
         <div class="field grow"><label class="label" for="pcsel">${t("pc.piece")}</label><select id="pcsel">
           ${grp(t("pc.gWest"), PIECES.filter(p => p.group === "west"))}${grp(t("pc.gTr"), PIECES.filter(p => p.group === "tr"))}
-          ${grp(t("pc.gEtude"), PIECES.filter(p => p.group === "etude"))}${grp(t("pc.gUser"), user)}</select></div>
+          ${grp(t("pc.gEtude"), PIECES.filter(p => p.group === "etude"))}${archIdx ? grp(t("pc.gTsm"), archIdx.filter(x => x.pop).map(archMeta)) : ""}${grp(t("pc.gUser"), user)}</select></div>
         <div class="field"><label class="label" for="pcgroove">${t("pc.groove")}</label><select id="pcgroove">
           <optgroup label="${esc(t("pc.gWestRhy"))}">${gopt("west")}</optgroup><optgroup label="${esc(t("pc.gTrRhy"))}">${gopt("tr")}</optgroup></select></div>
         <div class="field"><label class="label" for="pcpct">${t("pc.tempo")}</label>
@@ -120,6 +135,17 @@ const Pieces = (() => {
         </div>
       </div>
       <div class="cresult" id="pcres" aria-live="polite"></div>
+      <details class="learn" id="pcarch"><summary id="pcarchsum">${archIdx ? t("pc.arch", { n: archIdx.length }) : t("pc.archLoad")}</summary>
+        <div class="row">
+          <div class="field grow"><label class="label" for="pcaq">${t("pc.search")}</label><input type="search" id="pcaq"></div>
+          <div class="field"><label class="label" for="pcamk">${t("pc.makam")}</label><select id="pcamk"></select></div>
+          <div class="field"><label class="label" for="pcaf">${t("pc.form")}</label><select id="pcaf"></select></div>
+        </div>
+        <div class="pcparts"><label class="chk"><input type="checkbox" id="pcapop"> ${t("pc.popular")}</label>
+          <label class="chk"><input type="checkbox" id="pcaeasy" checked> ${t("pc.easy")}</label><span class="reg" id="pcacount"></span></div>
+        <ul class="alist" id="pcalist"></ul>
+        <p class="lead">${t("pc.archNote")}</p>
+      </details>
       <details class="learn" id="pclearn"><summary id="pclearnsum"></summary><ol class="steps" id="pcsteps"></ol></details>
       <details class="help"><summary>${t("pc.help")}</summary><p class="lead">${t("pc.helpText")}</p><p class="lead">${t("pc.noLyrics")}</p></details>
       <details class="editor" id="pceditor"><summary>${t("pc.editor")}</summary>
@@ -154,6 +180,11 @@ const Pieces = (() => {
     $("pcsave").addEventListener("click", edSave);
     $("pcnew").addEventListener("click", () => { editing = null; $("pcedtitle").value = ""; $("pcedtext").value = t("pc.template"); $("pcedmeter").value = "4/4"; $("pcedkey").value = "Am"; edCheck(); });
     $("pcdel").addEventListener("click", edDelete);
+    $("pcarch").addEventListener("toggle", () => { if($("pcarch").open) archOpen(); });
+    ["pcaq", "pcamk", "pcaf", "pcapop", "pcaeasy"].forEach(id => $(id).addEventListener(id === "pcaq" ? "input" : "change", archList));
+    $("pcalist").addEventListener("click", e => { const b = e.target.closest("[data-id]"); if(!b) return;
+      load("tsm:" + b.dataset.id).then(() => { if($("pcscore").scrollIntoView) $("pcscore").scrollIntoView({ block:"start" }); }); });
+    if(archIdx) archFill();
   }
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" })[c]);
   const say = html => { $("pcnow").innerHTML = html; };
@@ -163,11 +194,67 @@ const Pieces = (() => {
   const choice = () => store.get("pcChoice", {})[piece.id] || {};
   const groove = () => grooveById($("pcgroove").value) || grooveById(piece.groove);
 
-  function load(id){
+  async function load(id){
+    if(typeof id === "string" && id.startsWith("tsm:")) return loadArch(id.slice(4));
     piece = all().find(p => p.id === id) || PIECES[0];
+    setup(parsePiece(piece.text, piece.meter));
+  }
+  // ---- TSM nota arşivi (notalar/, js/core/archive.js) ----
+  let archIdx = null, archBusy = null;
+  const archMeta = x => ({ id: "tsm:" + x.id, title: x.t, by: x.b || t("pc.anon"), meter: "", key: "C", bpm: x.tp, arch: x });
+  function archIndex(){
+    if(archIdx) return Promise.resolve(archIdx);
+    if(!window.fetch) return Promise.resolve(null);
+    if(!archBusy) archBusy = fetch("notalar/index.json").then(r => r.json()).then(j => (archIdx = j.pieces))
+      .catch(() => { archBusy = null; return null; });
+    return archBusy;
+  }
+  async function archOpen(){
+    const had = !!archIdx;
+    if(!(await archIndex())){ $("pcacount").textContent = t("pc.archFail"); return; }
+    if(!had){ const id = piece && piece.id; build(); await load(id); $("pcarch").open = true; }
+  }
+  function archFill(){
+    const uniq = (k, n) => [...new Map(archIdx.map(x => [x[k], x[n]])).entries()].sort((a, b) => a[1].localeCompare(b[1], "tr"));
+    $("pcamk").replaceChildren(new Option(t("pc.all"), ""), ...uniq("mk", "mkn").map(([v, n]) => new Option(n, v)));
+    $("pcaf").replaceChildren(new Option(t("pc.all"), ""), ...uniq("f", "fn").map(([v, n]) => new Option(n, v)));
+    archList();
+  }
+  function archList(){
+    if(!archIdx) return;
+    const q = $("pcaq").value.trim().toLocaleLowerCase("tr"), mk = $("pcamk").value, f = $("pcaf").value,
+          pop = $("pcapop").checked, easy = $("pcaeasy").checked;
+    const res = archIdx.filter(x => (!mk || x.mk === mk) && (!f || x.f === f) && (!pop || x.pop) && (!easy || x.ke <= 60) &&
+      (!q || (x.t + " " + (x.b || "")).toLocaleLowerCase("tr").includes(q)))
+      .sort((a, b) => (b.pop || 0) - (a.pop || 0) || a.ke - b.ke);
+    $("pcacount").textContent = t("pc.found", { n: res.length });
+    $("pcalist").innerHTML = res.slice(0, 60).map(x => `<li><button type="button" data-id="${esc(x.id)}"><b>${x.pop ? "★ " : ""}${esc(x.t)}</b>
+      <small>${esc(x.mkn)} · ${esc(x.fn)} · ${esc(x.un)} · ${esc(x.b || t("pc.anon"))} · ${t("pc.comma", { n: Math.round(x.ke/10) })}</small></button></li>`).join("") +
+      (res.length > 60 ? `<li class="more">${t("pc.more", { n: res.length - 60 })}</li>` : "");
+  }
+  async function loadArch(aid){
+    const idx = await archIndex(), x = idx && idx.find(y => y.id === aid);
+    if(!x){ if(!piece) await load(PIECES[0].id); return; }
+    let j;
+    try{ j = await fetch("notalar/" + aid + ".json").then(r => r.json()); }
+    catch(e){ $("pcres").textContent = t("pc.archFail"); return; }
+    stop();
+    const p = archParse(j), drone = archDrone(p);
+    p.bandChordAt = () => drone;
+    // Usul adı elle yazılmış bir Türk kalıbıyla eşleşiyorsa (Aksak, Zeybek…) o, yoksa ölçüden üretilen kalıp
+    const un = (x.un || "").toLocaleLowerCase("tr");
+    const hand = GROOVES.find(h => h.family === "tr" && Math.abs(h.beats - p.barBeats) < 1e-9 && un.startsWith(h.name.toLocaleLowerCase("tr").split(/[ (]/)[0]));
+    piece = { ...archMeta(x), key: archKey(p), meter: p.num + "/" + p.den, groove: (hand || autoGroove(p.num, p.den)).id, commaErr: archCommaError(p) };
+    setup(p);
+  }
+  function setup(p){
     store.set("piece", piece.id);
+    if(![...$("pcsel").options].some(o => o.value === piece.id)) $("pcsel").append(new Option(L(piece, "title"), piece.id));
     $("pcsel").value = piece.id;
-    parsed = parsePiece(piece.text, piece.meter);
+    parsed = p;
+    // Parçanın ölçüsünden üretilen usul kalıbı da seçilebilsin
+    const auto = autoGroove(parsed.num, parsed.den);
+    if(!$("pcgroove").querySelector(`option[value="${auto.id}"]`)) $("pcgroove").prepend(new Option(auto.name + " · " + auto.meter, auto.id));
     // Eşlik seçimi: ölçü süresi tutan kalıplar
     const want = choice().groove || piece.groove;
     [...$("pcgroove").options].forEach(o => { o.disabled = Math.abs(grooveById(o.value).beats - parsed.barBeats) > 1e-9; });
@@ -180,6 +267,12 @@ const Pieces = (() => {
   }
   function meta(){
     const full = parsed.bars.filter(b => b.full).length;
+    if(piece.arch){
+      const x = piece.arch;
+      $("pcmeta").textContent = t("pc.archMeta", { by: x.b || t("pc.anon"), makam: x.mkn, form: x.fn, usul: x.un, n: full, bpm: piece.bpm,
+        comma: t("pc.comma", { n: Math.round(piece.commaErr*100) }) }) + " · " + L(groove(), "name");
+      return;
+    }
     $("pcmeta").textContent = t("pc.meta", { by: piece.id.startsWith("u-") ? t("pc.mine") : L(piece, "by"), meter: piece.meter, n: full, bpm: piece.bpm }) + " · " + L(groove(), "name");
   }
   function render(){
