@@ -483,7 +483,7 @@ const Pieces = (() => {
   }
   function edSave(){
     const p = edCheck();
-    if(p.errors.length || !p.notes.some(n => n.w !== null) || !p.chords.length){ if(!p.chords.length && !p.errors.length) $("pcederr").textContent = t("song.needChord"); return; }
+    if(p.errors.length || !p.notes.some(n => n.w !== null)) return;          // akorsuz parça da olur: grup davul ve basla değil, yalnız davulla çalar
     const meter = $("pcedmeter").value, g = GROOVES.find(x => Math.abs(x.beats - p.barBeats) < 1e-9) || GROOVES[0];
     let s = editing && user.find(u => u.id === editing);
     if(!s){ s = { id: "u-" + Date.now() }; user.push(s); }
@@ -509,5 +509,15 @@ const Pieces = (() => {
   window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(() => { if(piece && !run && !$("panel-parcalar").hidden) render(); }, 200); });
 
   build(); load(store.get("piece", PIECES[0].id));
-  return { open(id){ load(id); }, get playing(){ return !!run; } };
+  // Başka sekmeden (Kulaktan çıkar, Çevir) gelen parçayı kullanıcının parçalarına ekleyip açar
+  function importPiece(o){
+    const p = parsePiece(o.text, o.meter || "4/4");
+    const g = GROOVES.find(x => Math.abs(x.beats - p.barBeats) < 1e-9) || GROOVES[0];
+    const s = { id: "u-" + Date.now(), title: o.title || t("pc.untitled"), meter: o.meter || "4/4", key: o.key || "C", text: o.text,
+      groove: g.id, bpm: o.bpm || g.bpm, group:"user", by:"" };
+    user.push(s); store.set("pieces", user);
+    build(); load(s.id);
+    return s.id;
+  }
+  return { open(id){ load(id); }, importPiece, get playing(){ return !!run; } };
 })();

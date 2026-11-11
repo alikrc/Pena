@@ -1,6 +1,6 @@
 // Testler: js/core/*.js dosyaları tarayıcıdaki sırayla bir vm bağlamına yüklenir ve oradaki adlar kullanılır.
 const fs = require('fs'), path = require('path'), vm = require('vm');
-const CORE = ['i18n', 'music', 'guitar', 'chords', 'rhythm', 'songs', 'band', 'follow', 'pieces', 'archive', 'ear', 'lessons'];
+const CORE = ['i18n', 'music', 'guitar', 'chords', 'rhythm', 'songs', 'band', 'follow', 'pieces', 'archive', 'transcribe', 'ear', 'lessons'];
 const ctx = vm.createContext({ console });
 for(const f of CORE) vm.runInContext(fs.readFileSync(path.join(__dirname, 'js/core', f + '.js'), 'utf8'), ctx, { filename: f + '.js' });
 const core = new Proxy({}, { get: (_, k) => vm.runInContext(String(k), ctx) });
@@ -498,6 +498,20 @@ ok(['5/8','9/8','7/8','10/8','28/8'].every(m => { const [n, d] = m.split('/').ma
   return g.darbuka.length === g.cells && g.bass.length === g.cells && Math.abs(g.beats - n*4/d) < 1e-9 && g.darbuka[0] === 'D'; }), 'olcuden uretilen usul kaliplari');
 ok(grooveById('auto:9/8').beats === 4.5 && grooveBar(autoGroove(9, 8), 0, () => archDrone(usk)).some(e => e.part === 'bass'), 'auto: kalibi ve demle bas');
 
+
+console.log('\n[28] Kulaktan cikar: yavaslatma ve notaya dokme');
+const { wsola, stretchShiftGen, runGen, pitchTraceGen, traceNotes, notesToPiece } = core;
+const SR = 22050, sine = (f, sec) => Float32Array.from({ length: Math.round(SR*sec) }, (_, i) => 0.3*Math.sin(2*Math.PI*f*i/SR));
+const x220 = sine(220, 1), slow = wsola(x220, 0.5, SR);
+const fSlow = detectPitch(slow.subarray(10000, 14096), SR, 60, 1400, 0.005).freq;
+ok(Math.abs(slow.length - 2*x220.length) < 0.05*x220.length && Math.abs(fSlow - 220) < 3, 'yari hiz: iki kat uzun, perde ayni', slow.length + ' ornek, ' + fSlow.toFixed(1) + ' Hz');
+const up = runGen(stretchShiftGen(x220, SR, 1, 1200)), fUp = detectPitch(up.subarray(4000, 8096), SR, 60, 1400, 0.005).freq;
+ok(Math.abs(up.length - x220.length) < 400 && Math.abs(fUp - 440) < 6, '+12 yarim ses: ayni sure, bir oktav tiz', fUp.toFixed(1) + ' Hz');
+const mel = new Float32Array([...sine(196, 0.5), ...sine(220, 0.5), ...sine(246.94, 1)]);
+const tr = runGen(pitchTraceGen(mel, SR)), tn = traceNotes(tr);
+ok(tn.map(n => n.w).join() === '67,69,71', 'perde izinden notalar: yazili Sol4 La4 Si4', tn.map(n => n.w).join());
+const pcx = notesToPiece(tn, 120), ppz = parsePiece(pcx.text, '4/4');
+ok(ppz.errors.length === 0 && [...new Set(ppz.notes.filter(n => n.w !== null).map(n => n.w))].join() === '67,69,71' && !ppz.notes.slice(0, -1).some(n => n.w === null) && pcx.bpm === 120, 'notalar Parcalar yazimina donuyor', pcx.text);
 
 console.log('\n[23] Uygulama dosyalari');
 const scripts = [...html.matchAll(/<script src="([^"]+)"/g)].map(m=>m[1]);

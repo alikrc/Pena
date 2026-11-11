@@ -695,3 +695,12 @@ details.learn .steps li.done b{color:var(--ok)}
 .alist button:hover{border-color:var(--teal)}
 .alist small{color:var(--muted);font-size:12px}
 .alist .more{font-size:12.5px;color:var(--muted);padding:4px 10px}
+
+/* ---- Kulaktan çıkar ---- */
+.kfwrap canvas{display:block;width:100%;background:var(--sunk);border-radius:10px;margin:6px 0;touch-action:none}
+.kfwave{height:96px;cursor:pointer}
+.kfpitch{height:120px}
+.kfnow{display:flex;gap:14px;align-items:baseline;flex-wrap:wrap;margin:6px 0 10px;font-variant-numeric:tabular-nums}
+.kfnow b{font:600 18px var(--display);color:var(--accent)}
+.kfmarks{display:flex;flex-wrap:wrap;gap:6px}
+.kfmk{display:inline-flex;gap:2px}

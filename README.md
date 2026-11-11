@@ -49,6 +49,10 @@ Mikrofondan çaldığını dinler ve geri bildirim verir. Ses cihazda işlenir, 
   veri CC BY-NC-SA 4.0 (SymbTr, M. K. Karaosmanoğlu, MTG–UPF).
 - **Şarkılarda grup eşliği**: Türkçe pop/rock, türküler ve yabancı şarkılar seçili vuruşa uyan kalıpla (davul + bas,
   capo hesaba katılarak) çalınır; birlikte çalarken de.
+- **Kulaktan çıkar**: ses ya da video dosyasını aç; dalga biçiminde dokunarak konum, sürükleyerek bölge seç; perdesini bozmadan
+  %25–125 hız (WSOLA), ±12 yarım ses ve ±50 sent kaydırma (farklı akortlu kayıtlar için), A–B döngü, işaretler, bölgeye
+  yakınlaşma. Perde izi gitar notası adlarıyla çizilir; çalan yerin notası, teli ve perdesi yazar. Seçili bölge notaya dökülüp
+  Parçalar'a eklenir (tempo nota aralıklarından tahmin edilir, süreler on altılığa yuvarlanır). Dosya cihazdan çıkmaz.
 - **Ezgiler**: nota nota çalma; her notanın teli, perdesi ve parmağı komşu notalara göre seçilir (pozisyon planı), tab. Doğru notayı
   duyunca sıradakine geçer, yanlışta ne duyduğunu söyler. Kendi ezgini `Mi4 Re4 Do4:2` biçiminde yazabilirsin.
 - **Kulak**: majör/minör, majör/minör/yedili, aralıklar, hangi açık tel; 10 soruluk turlar, en iyi puan.
