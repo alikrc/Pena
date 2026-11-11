@@ -77,7 +77,7 @@ const tick = (ms = 0) => new Promise(r => setTimeout(r, ms));
   console.log('\n[UI 1] Yükleme ve sekmeler');
   ok(errors.length === 0, 'sayfa betik hatası olmadan yükleniyor', errors.slice(0, 3).join(' | '));
   const tabs = [...doc.querySelectorAll('#tabs [role=tab]')];
-  ok(tabs.length === 12 && visible().join() === 'panel-dersler', 'ilk açılışta yalnız Dersler paneli görünür', visible().join());
+  ok(tabs.length === 13 && visible().join() === 'panel-dersler', 'ilk açılışta yalnız Dersler paneli görünür', visible().join());
   let tabErr = [];
   for(const t of tabs){
     click(t);

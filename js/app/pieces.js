@@ -519,5 +519,12 @@ const Pieces = (() => {
     build(); load(s.id);
     return s.id;
   }
-  return { open(id){ load(id); }, importPiece, get playing(){ return !!run; } };
+  // Kaydedilmeyen geçici parça (Okuma sekmesinin deşifre ezgisi): açar, istenirse hemen çalmaya başlar
+  function openTemp(o, mode){
+    stop();
+    piece = { by: o.by || "", group:"tmp", ...o, id: "tmp:" + Date.now() };
+    setup(parsePiece(o.text, o.meter));
+    if(mode) start(mode);
+  }
+  return { open(id){ load(id); }, importPiece, openTemp, get playing(){ return !!run; } };
 })();

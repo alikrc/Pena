@@ -30,6 +30,7 @@ const UiText = (() => {
     "h.tab-sarkilar": { tr:"Şarkılar", en:"Songs" },
     "h.tab-parcalar": { tr:"Parçalar", en:"Pieces" },
     "h.tab-kulaktan": { tr:"Kulaktan çıkar", en:"Learn by ear" },
+    "h.tab-okuma": { tr:"Okuma ve dikte", en:"Reading and dictation" },
     "h.tab-kayit": { tr:"Kayıt", en:"Recordings" },
     "h.tab-ilerleme": { tr:"İlerleme", en:"Progress" },
     "h.tab-ezgiler": { tr:"Ezgiler", en:"Melodies" },

@@ -53,6 +53,10 @@ Mikrofondan çaldığını dinler ve geri bildirim verir. Ses cihazda işlenir, 
   %25–125 hız (WSOLA), ±12 yarım ses ve ±50 sent kaydırma (farklı akortlu kayıtlar için), A–B döngü, işaretler, bölgeye
   yakınlaşma. Perde izi gitar notası adlarıyla çizilir; çalan yerin notası, teli ve perdesi yazar. Seçili bölge notaya dökülüp
   Parçalar'a eklenir (tempo nota aralıklarından tahmin edilir, süreler on altılığa yuvarlanır). Dosya cihazdan çıkmaz.
+- **Okuma ve dikte**: deşifre (her seferinde yeni üretilen 4 ölçülük ezgi; 5 seviye: 1.–2. tel, ilk üç tel, 1. pozisyon, Sol ve Fa
+  majör donanımı, komasız makam dizileri ve 9/8, 7/8; inceleme süresinden sonra Parçalar'da grupla çalınıp puanlanır, tab gizli),
+  nota okuma (dizekteki notayı gitarda çal ya da adını seç; zorlanılan notalar daha sık), ezgi diktesi (ilk nota verili, kalanı
+  seç ya da çal) ve ritim diktesi (dört nota yazısından duyulanı bul).
 - **Kayıt**: kendini kaydet (en çok 3 dk), dinle, indir; perde eğrisi, nota dökümü, entonasyon (notaların tam sesten ortalama
   sapması, pes/tiz eğilimi) ve en çok kayan notalar. İki kaydı karşılaştır: üst üste perde eğrileri ve sapma farkı. Kayıtlar
   yalnız cihazda (IndexedDB), son 50, ★ olanlar silinmez.

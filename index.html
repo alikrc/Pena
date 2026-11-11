@@ -41,6 +41,7 @@
   <symbol id="i-wave" viewBox="0 0 24 24"><path d="M3 12h2M7 8v8M11 5v14M15 9v6M19 7v10M21 12h0"/></symbol>
   <symbol id="i-rec" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3.5" fill="currentColor" stroke="none"/></symbol>
   <symbol id="i-prog" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></symbol>
+  <symbol id="i-read" viewBox="0 0 24 24"><path d="M3 6h18M3 10h18M3 14h18M3 18h18"/><ellipse cx="9" cy="14" rx="2.4" ry="1.8" fill="currentColor" stroke="none"/><path d="M11.3 14V5"/></symbol>
   <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
 </svg>
 
@@ -63,6 +64,7 @@
           <div class="navlabel" aria-hidden="true" data-i18n="h.daha-fazla">Daha fazla</div>
           <button type="button" role="tab" id="tab-parcalar" aria-controls="panel-parcalar"><svg class="ico" aria-hidden="true"><use href="#i-band"/></svg><span class="tl" data-i18n="h.tab-parcalar">Parçalar</span></button>
           <button type="button" role="tab" id="tab-kulaktan" aria-controls="panel-kulaktan"><svg class="ico" aria-hidden="true"><use href="#i-wave"/></svg><span class="tl" data-i18n="h.tab-kulaktan">Kulaktan çıkar</span></button>
+          <button type="button" role="tab" id="tab-okuma" aria-controls="panel-okuma"><svg class="ico" aria-hidden="true"><use href="#i-read"/></svg><span class="tl" data-i18n="h.tab-okuma">Okuma ve dikte</span></button>
           <button type="button" role="tab" id="tab-kayit" aria-controls="panel-kayit"><svg class="ico" aria-hidden="true"><use href="#i-rec"/></svg><span class="tl" data-i18n="h.tab-kayit">Kayıt</span></button>
           <button type="button" role="tab" id="tab-ilerleme" aria-controls="panel-ilerleme"><svg class="ico" aria-hidden="true"><use href="#i-prog"/></svg><span class="tl" data-i18n="h.tab-ilerleme">İlerleme</span></button>
           <button type="button" role="tab" id="tab-sap" aria-controls="panel-sap"><svg class="ico" aria-hidden="true"><use href="#i-neck"/></svg><span class="tl" data-i18n="h.tab-sap">Sap ve notalar</span></button>
@@ -436,6 +438,9 @@
     <div id="kfroot"></div>
   </section>
 
+  <section class="panel" id="panel-okuma" role="tabpanel" aria-labelledby="tab-okuma" hidden>
+    <div id="rdroot"></div>
+  </section>
   <section class="panel" id="panel-kayit" role="tabpanel" aria-labelledby="tab-kayit" hidden>
     <div id="rcroot"></div>
   </section>
@@ -604,6 +609,7 @@
 <script src="js/core/archive.js"></script>
 <script src="js/core/transcribe.js"></script>
 <script src="js/core/progress.js"></script>
+<script src="js/core/reading.js"></script>
 <script src="js/core/ear.js"></script>
 <script src="js/core/lessons.js"></script>
 <script src="js/app/base.js"></script>
@@ -622,6 +628,7 @@
 <script src="js/app/melody.js"></script>
 <script src="js/app/pieces.js"></script>
 <script src="js/app/kulaktan.js"></script>
+<script src="js/app/okuma.js"></script>
 <script src="js/app/kayit.js"></script>
 <script src="js/app/progress.js"></script>
 <script src="js/app/ear.js"></script>

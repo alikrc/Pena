@@ -724,3 +724,14 @@ details.learn .steps li.done b{color:var(--ok)}
 .rclist .cbtns{display:flex;flex-wrap:wrap;gap:4px;margin:0}
 .rcnotes{font:13px var(--mono);color:var(--muted);line-height:1.7;word-spacing:2px}
 .primary.rec{background:#C0392B}
+
+/* ---- Okuma ve dikte ---- */
+.rdseg{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.rdseg button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:8px 14px;font:600 13px var(--ui)}
+.rdseg button[aria-checked=true]{background:var(--teal);border-color:var(--teal);color:var(--surface)}
+.rdq{max-width:220px}
+.rdnames{flex-wrap:wrap}
+.rdchoices{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px;margin:8px 0}
+.rdch{display:grid;gap:2px;text-align:left;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:6px;color:var(--ink)}
+.rdch.right{outline:3px solid var(--ok)}.rdch.wrong{outline:3px solid #C0392B}
+.rdmini{max-height:120px;overflow:hidden}

@@ -1,6 +1,6 @@
 // Testler: js/core/*.js dosyaları tarayıcıdaki sırayla bir vm bağlamına yüklenir ve oradaki adlar kullanılır.
 const fs = require('fs'), path = require('path'), vm = require('vm');
-const CORE = ['i18n', 'music', 'guitar', 'chords', 'rhythm', 'songs', 'band', 'follow', 'pieces', 'archive', 'transcribe', 'progress', 'ear', 'lessons'];
+const CORE = ['i18n', 'music', 'guitar', 'chords', 'rhythm', 'songs', 'band', 'follow', 'pieces', 'archive', 'transcribe', 'progress', 'reading', 'ear', 'lessons'];
 const ctx = vm.createContext({ console });
 for(const f of CORE) vm.runInContext(fs.readFileSync(path.join(__dirname, 'js/core', f + '.js'), 'utf8'), ctx, { filename: f + '.js' });
 const core = new Proxy({}, { get: (_, k) => vm.runInContext(String(k), ctx) });
@@ -522,6 +522,28 @@ ok(bestStreak(dd) === 2 && lastDays(dd, '2026-11-11', 3).map(d => d.sec).join() 
 const rr = records([{ t:1, type:'piece', id:'ode', pct:50 }, { t:2, type:'piece', id:'ode', pct:80, title:'Ode' }, { t:3, type:'changes', pair:['Am','Em'], perMin:22 }, { t:4, type:'ear', mode:'mm', correct:7, total:10 }]);
 ok(rr.length === 3 && rr.find(r => r.type === 'piece').best === 80 && rr.find(r => r.type === 'piece').n === 2 && rr.find(r => r.type === 'ear').best === 70 && rr[0].type === 'ear',
    'rekorlar: tur ve kimlik basina en iyi, deneme sayisi, son yapilan basta');
+
+console.log('\n[30] Okuma: desifre ezgisi, nota sorusu, dikte');
+const { READ_LEVELS, sightPiece, readQuizNote, dictMelody, rhythmChoices } = core;
+let rdSeed = 7; const rnd = () => (rdSeed = (rdSeed*16807) % 2147483647)/2147483647;
+const rdErr = [];
+for(const L0 of READ_LEVELS) for(let k = 0; k < 60; k++){
+  const s = sightPiece(L0.id, rnd), p = parsePiece(s.text, s.meter), g = grooveById(s.groove);
+  if(p.errors.length) rdErr.push(L0.id + ': ' + p.errors.join(',') + ' ' + s.text);
+  if(p.bars.length !== 4 || !p.bars.every(b => b.full)) rdErr.push(L0.id + ': olcu ' + s.text);
+  if(!g || Math.abs(g.beats - p.barBeats) > 1e-9) rdErr.push(L0.id + ': kalip');
+  if(!(s.key in KEY_SIG) || !p.chords.length) rdErr.push(L0.id + ': donanim/akor');
+  if(p.notes.some(n => n.w < 52 || n.w > 84)) rdErr.push(L0.id + ': aralik');
+  if(rdErr.length > 4) break;
+}
+ok(rdErr.length === 0, 'her seviyede 60 desifre ezgisi: 4 tam olcu, gecerli sure, akor ve eslik kalibi', rdErr.slice(0, 3).join(' | '));
+const l1 = Array.from({ length: 200 }, () => readQuizNote(1, rnd));
+ok(l1.every(w => READ_LEVELS[0].pool.includes(w)) && new Set(l1).size === READ_LEVELS[0].pool.length, 'nota sorusu seviye havuzundan, hepsi cikiyor');
+const hw = Array.from({ length: 400 }, () => readQuizNote(1, rnd, { 71: 20 })).filter(w => w === 71).length;
+ok(hw > 150, 'zorlanilan nota daha sik soruluyor', hw + '/400');
+const dm = dictMelody(2, 5, rnd), rc = rhythmChoices('4/4', 2, rnd);
+ok(dm.length === 5 && dm.every(w => READ_LEVELS[1].pool.includes(w)) && rc.choices.length === 4 && rc.choices.every(c => Math.abs(c.reduce((a, b) => a + b, 0) - 4) < 1e-9) &&
+   new Set(rc.choices.map(c => c.join())).size === 4, 'dikte: ezgi havuzdan, dort farkli ritim secenegi');
 
 console.log('\n[23] Uygulama dosyalari');
 const scripts = [...html.matchAll(/<script src="([^"]+)"/g)].map(m=>m[1]);
